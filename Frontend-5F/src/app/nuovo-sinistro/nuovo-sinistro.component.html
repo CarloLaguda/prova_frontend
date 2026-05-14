@@ -1,0 +1,118 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+  
+  <div (click)="$event.stopPropagation()" class="w-full max-w-2xl bg-white rounded-[40px] shadow-2xl shadow-blue-100/40 p-10 relative">
+    
+    <button type="button" (click)="close()" aria-label="Chiudi" class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 class="text-2xl font-black mb-6 text-[#061E29]">Nuovo Sinistro</h2>
+
+    <form (ngSubmit)="submit()" class="flex flex-col gap-6">
+
+      <div>
+        <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2 block">Seleziona Veicolo</label>
+        
+        <p *ngIf="veicoliService.veicoli.length === 0" class="text-xs text-red-500 mb-2">
+          Attenzione: Nessun veicolo trovato nel database per questo profilo.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div
+            *ngFor="let v of veicoliService.veicoli"
+            (click)="selectVehicle(v.targa)"
+            class="cursor-pointer p-4 rounded-xl border transition-all relative group"
+            [class.border-blue-500]="formData.targa === v.targa"
+            [class.border-slate-200]="formData.targa !== v.targa"
+          >
+            <div class="text-[10px] text-slate-400 font-bold uppercase">{{ v.marca }}</div>
+            <div class="font-semibold text-[#061E29]">{{ v.targa }}</div>
+            
+            <svg
+              *ngIf="formData.targa === v.targa"
+              class="w-6 h-6 text-[#088395] absolute top-2 right-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.172l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Data evento</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none z-20">
+            <i class="bi bi-calendar3 text-slate-400"></i>
+          </span>
+
+          <span class="absolute inset-y-0 left-10 flex items-center pointer-events-none z-10 text-sm text-slate-800">
+            {{ formData.data_evento | date:'dd/MM/yyyy' }}
+          </span>
+
+          <input
+            type="date"
+            [(ngModel)]="formData.data_evento"
+            name="data_evento"
+            [max]="maxDate"
+            required
+            class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 transition-all relative z-0"
+          />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Descrizione</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+            <i class="bi bi-pencil-square text-slate-400"></i>
+          </span>
+          <textarea
+            [(ngModel)]="formData.descrizione"
+            name="descrizione"
+            rows="4"
+            required
+            placeholder="Descrivi l'accaduto..."
+            class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 resize-none focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 transition-all"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Via incidente (opzionale)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+            <i class="bi bi-geo-alt text-slate-400"></i>
+          </span>
+          <input
+            type="text"
+            [(ngModel)]="formData.luogo"
+            name="luogo"
+            placeholder="Via dell'incidente"
+            class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]/20 transition-all"
+          />
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="text-red-600 text-xs font-semibold p-2 bg-red-50 rounded-lg">{{ errorMessage }}</div>
+      <div *ngIf="warningMessage" class="text-amber-700 text-xs font-semibold p-2 bg-amber-50 rounded-lg">{{ warningMessage }}</div>
+      <div *ngIf="successMessage" class="text-green-600 text-xs font-semibold p-2 bg-green-50 rounded-lg">{{ successMessage }}</div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full py-3 bg-[#088395] text-white text-sm font-extrabold rounded-xl shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+      >
+        <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        {{ loading ? 'Invio in corso...' : 'Crea Sinistro' }}
+      </button>
+    </form>
+  </div>
+</div>

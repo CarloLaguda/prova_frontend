@@ -1,0 +1,200 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+  <div (click)="$event.stopPropagation()"
+       class="w-full max-w-2xl bg-white rounded-[40px] shadow-2xl shadow-red-100/40 relative overflow-hidden max-h-[90vh] flex flex-col">
+
+    <!-- Header emergenza -->
+    <div class="bg-gradient-to-r from-red-500 to-orange-500 px-8 py-6 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/20 p-3 rounded-xl">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-white tracking-tight uppercase">Richiedi Soccorso</h2>
+          <p class="text-white/70 text-xs font-semibold mt-0.5">Assistenza stradale immediata</p>
+        </div>
+      </div>
+      <button (click)="close()" aria-label="Chiudi"
+        class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="overflow-y-auto flex-1 p-8 space-y-6">
+
+      <!-- Stato successo -->
+      <div *ngIf="successo" class="flex flex-col items-center gap-4 py-8">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <p class="text-sm font-black text-green-700 text-center">{{ successo }}</p>
+      </div>
+
+      <div *ngIf="!successo">
+
+        <!-- Selezione veicolo -->
+        <div>
+          <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+            Seleziona Veicolo <span class="text-red-500">*</span>
+          </label>
+          <div *ngIf="veicoli.length === 0" class="text-xs text-red-500 font-semibold p-3 bg-red-50 rounded-xl border border-red-200">
+            Nessun veicolo registrato. Aggiungi un veicolo prima di richiedere il soccorso.
+          </div>
+          <div *ngIf="veicoli.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div *ngFor="let v of veicoli"
+                 (click)="targaSelezionata = v.targa"
+                 class="cursor-pointer p-4 rounded-xl border-2 transition-all"
+                 [class.border-red-500]="targaSelezionata === v.targa"
+                 [class.bg-red-50]="targaSelezionata === v.targa"
+                 [class.border-slate-200]="targaSelezionata !== v.targa">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-[10px] font-black text-slate-400 uppercase">{{ v.marca }}</p>
+                  <p class="font-black text-[#061E29] text-sm">{{ v.modello }}</p>
+                </div>
+                <span class="font-mono font-black text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">
+                  {{ v.targa }}
+                </span>
+              </div>
+              <div *ngIf="targaSelezionata === v.targa"
+                   class="mt-2 flex items-center gap-1.5 text-[10px] font-black text-red-600">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.172l7.879-7.879a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                Selezionato
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Posizione -->
+        <div>
+          <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+            La Tua Posizione
+          </label>
+
+          <div *ngIf="geoLoading"
+               class="flex items-center gap-3 p-4 bg-[#F4F4F4] rounded-xl border border-slate-200">
+            <svg class="w-4 h-4 animate-spin text-[#09637E]" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <span class="text-xs font-semibold text-slate-500">Rilevamento posizione in corso...</span>
+          </div>
+
+          <div *ngIf="!geoLoading && lat !== null"
+               class="p-4 bg-green-50 rounded-xl border border-green-200 space-y-1">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span class="text-xs font-black text-green-700">Posizione rilevata</span>
+            </div>
+            <p *ngIf="indirizzoRilevato" class="text-xs text-green-600 font-medium ml-6">{{ indirizzoRilevato }}</p>
+            <p class="text-[10px] text-green-500 font-mono ml-6">{{ lat | number:'1.4-6' }}, {{ lon | number:'1.4-6' }}</p>
+          </div>
+
+          <div *ngIf="!geoLoading && lat === null">
+            <div *ngIf="geoErrore" class="p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-3">
+              <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              <div>
+                <p class="text-xs font-black text-amber-700">{{ geoErrore }}</p>
+                <button (click)="rilievaPosizioneAuto()" type="button"
+                  class="mt-2 text-[10px] font-black text-amber-700 underline">
+                  Riprova
+                </button>
+              </div>
+            </div>
+            <div class="mt-4 space-y-3">
+              <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                Inserisci l'indirizzo manualmente
+              </label>
+              <input type="text"
+                     [(ngModel)]="indirizzoManuale"
+                     placeholder="Via, numero civico, città"
+                     class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-200" />
+              <p class="text-[10px] text-slate-400 font-semibold">
+                Se la geolocalizzazione non funziona, inserisci qui l'indirizzo per inviare comunque la richiesta.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Errore -->
+        <div *ngIf="errore" class="text-red-600 text-xs font-semibold p-3 bg-red-50 rounded-xl border border-red-200">
+          {{ errore }}
+        </div>
+
+        <!-- Bottone invio -->
+        <button type="button" (click)="invia()" [disabled]="loading || veicoli.length === 0"
+          class="w-full py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-extrabold
+                 rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                 hover:shadow-red-200 hover:shadow-xl flex items-center justify-center gap-2">
+          <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          <svg *ngIf="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          {{ loading ? 'Invio in corso...' : 'Richiedi Soccorso Ora' }}
+        </button>
+      </div>
+
+      <!-- Storico richieste -->
+      <div>
+        <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Richieste Precedenti</h3>
+
+        <div *ngIf="loadingRichieste" class="text-center py-6">
+          <svg class="w-5 h-5 animate-spin mx-auto text-slate-300" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        </div>
+
+        <div *ngIf="!loadingRichieste && richieste.length === 0"
+             class="text-center py-6 text-xs font-black text-slate-300 uppercase tracking-widest">
+          Nessuna richiesta precedente
+        </div>
+
+        <div *ngIf="!loadingRichieste && richieste.length > 0" class="space-y-2">
+          <div *ngFor="let r of richieste"
+               class="flex items-center justify-between p-3 bg-[#F4F4F4] rounded-xl border border-slate-100">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs font-black text-slate-700">#{{ r.id }}</p>
+                <p class="text-[10px] text-slate-400 font-semibold">
+                  {{ formatOraRichiesta(r.data_richiesta) }}
+                </p>
+              </div>
+            </div>
+            <span class="text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest border"
+              [ngClass]="getStatoClass(r.stato)">
+              {{ r.stato }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+/* Sidebar slide animation */
+.translate-x-full {
+  transform: translateX(100%);
+}
+
+.translate-x-0 {
+  transform: translateX(0);
+}
+
+/* ============================================
+   KEYFRAMES
+   ============================================ */
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+
+@keyframes sidebarIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes badgePop {
+  0%   { opacity: 0; transform: scale(0.8) translateY(10px); }
+  70%  { transform: scale(1.05) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.5; }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -30px) scale(1.05); }
+  66%       { transform: translate(-15px, 20px) scale(0.97); }
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.03; }
+  50%       { opacity: 0.08; }
+}
+
+/* ============================================
+   ANIMATION UTILITY CLASSES
+   (keyframe-based, non disponibili in Tailwind)
+   ============================================ */
+
+.animate-fade-down   { animation: slideDown 0.55s ease-out forwards; opacity: 0; }
+.animate-fade-up     { animation: slideUp 0.6s ease-out forwards; opacity: 0; }
+.animate-fade-in     { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+.animate-badge-pop   { animation: badgePop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+.animate-dot-pulse   { animation: dotPulse 2.5s ease-in-out infinite; }
+.animate-hero-float  { animation: heroFloat 5s ease-in-out infinite; }
+.animate-orb-1       { animation: orbFloat 12s ease-in-out infinite; }
+.animate-orb-2       { animation: orbFloat 16s ease-in-out infinite reverse; }
+.animate-orb-3       { animation: orbFloat 20s ease-in-out infinite 3s; }
+.animate-grid-pulse  { animation: gridPulse 6s ease-in-out infinite; }
+.animate-shimmer-text {
+  background: linear-gradient(90deg, #09637E, #7AB2B2, #088395);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+.sidebar-slide-in  { animation: sidebarIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.settings-panel-in { animation: slideInRight 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.settings-panel-out{ animation: slideOutRight 0.3s cubic-bezier(0.55, 0, 0.1, 1) forwards; }
+.modal-pop         { animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+.delay-6 { animation-delay: 0.52s; }
+.delay-7 { animation-delay: 0.64s; }
+.delay-8 { animation-delay: 0.76s; }
+
+/* ============================================
+   PSEUDO-ELEMENTS & COMPLEX BG
+   (non fattibili puramente in Tailwind)
+   ============================================ */
+
+/* Settings header gradient border bottom */
+.settings-header { position: relative; }
+.settings-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #09637E 0%, #088395 50%, transparent 100%);
+}
+
+/* Hero grid: doppio background-image non supportato da Tailwind */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}

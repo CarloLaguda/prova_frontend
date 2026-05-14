@@ -1,0 +1,90 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+  <div (click)="$event.stopPropagation()" class="w-full max-w-2xl bg-white rounded-[40px] shadow-2xl shadow-blue-100/40 p-10 relative">
+
+    <button type="button" (click)="close()" aria-label="Chiudi" class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 class="text-2xl font-black mb-6 text-[#061E29]">Nuovo Veicolo</h2>
+
+    <form (ngSubmit)="submit()" class="flex flex-col gap-6">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Targa</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <i class="bi bi-card-text text-slate-400"></i>
+            </span>
+            <input type="text" [(ngModel)]="formData.targa" name="targa" required placeholder="Es. AB123CD" maxlength="7"
+              class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border transition-all uppercase placeholder-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] bg-[#F4F4F4] text-slate-800"
+              [class.border-red-400]="formData.targa && !targaValida(formData.targa)" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Numero Telaio</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <i class="bi bi-hash text-slate-400"></i>
+            </span>
+            <input type="text" [(ngModel)]="formData.n_telaio" name="n_telaio" required placeholder="Inserisci VIN"
+              class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 placeholder-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Marca</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <i class="bi bi-car-front text-slate-400"></i>
+            </span>
+            <input type="text" [(ngModel)]="formData.marca" name="marca" required placeholder="Es. Fiat..."
+              class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 placeholder-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Modello</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <i class="bi bi-tag text-slate-400"></i>
+            </span>
+            <input type="text" [(ngModel)]="formData.modello" name="modello" required placeholder="Es. Panda..."
+              class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 placeholder-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-black text-slate-500 uppercase tracking-widest">Anno Immatricolazione</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+            <i class="bi bi-calendar-event text-slate-400"></i>
+          </span>
+          <input type="number" [(ngModel)]="formData.anno_immatricolazione" name="anno_immatricolazione" required
+            class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-slate-200 bg-[#F4F4F4] text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all" />
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="text-red-600 text-xs font-semibold p-2 bg-red-50 rounded-lg">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="text-green-600 text-xs font-semibold p-2 bg-green-50 rounded-lg">{{ successMessage }}</div>
+
+      <button type="submit" [disabled]="loading"
+        class="w-full py-4 bg-[#088395] text-white text-sm font-extrabold rounded-xl shadow-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+        <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        {{ loading ? 'Salvataggio...' : 'Aggiungi Veicolo' }}
+      </button>
+
+    </form>
+  </div>
+</div>

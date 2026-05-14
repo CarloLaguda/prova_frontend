@@ -1,0 +1,29 @@
+/* Forza la comparsa dell'icona del calendario e la pulizia del campo */
+.date-input {
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* Quando l'input diventa date, questo stile assicura che il placeholder scompaia correttamente */
+.date-input[type="date"]::before {
+    content: attr(placeholder);
+    width: 100%;
+    color: #cbd5e1; /* slate-300 */
+}
+
+.date-input[type="date"]:focus::before,
+.date-input[type="date"]:valid::before {
+    display: none;
+}
+
+/* Stile per l'icona del calendario standard dei browser */
+.date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}

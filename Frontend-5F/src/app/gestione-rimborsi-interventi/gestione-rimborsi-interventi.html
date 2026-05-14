@@ -1,0 +1,321 @@
+<div class="w-full min-h-screen bg-[#EBF4F6]">
+  <div class="max-w-6xl mx-auto px-6 py-10">
+
+    <!-- HEADER -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+      <div>
+        <h1 class="text-3xl font-black text-[#09637E] uppercase tracking-tight">
+          Gestione <span class="text-[#088395]">Rimborsi & Interventi</span>
+        </h1>
+        <p class="text-slate-500 font-medium mt-1">Gestisci rimborsi e interventi per le pratiche in perizia.</p>
+      </div>
+      <button type="button" (click)="tornaAlPerito()"
+        class="flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-[0.2em] py-3 px-5 rounded-xl transition-all shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Torna alla Dashboard
+      </button>
+    </header>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+      <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-[#09637E] flex items-center gap-4">
+        <div class="bg-[#EBF4F6] p-3 rounded-lg text-[#09637E]">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-[#09637E]">{{ pratiche.length }}</h3>
+          <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Pratiche Totali</p>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center gap-4">
+        <div class="bg-green-50 p-3 rounded-lg text-green-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-[#09637E]">
+            {{ pratiche.filter(p => p.stato === 'rimborso_inserito' || p.stato === 'rimborso_proposto').length }}
+          </h3>
+          <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Rimborsi Inseriti</p>
+        </div>
+      </div>
+      <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-orange-400 flex items-center gap-4">
+        <div class="bg-orange-50 p-3 rounded-lg text-orange-500">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-[#09637E]">
+            {{ pratiche.filter(p => p.stato === 'inviata_officina' || p.stato === 'in_riparazione').length }}
+          </h3>
+          <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-0.5">Interventi Avviati</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS + RICERCA -->
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-2 bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
+          <button type="button" (click)="vistaAttiva = 'rimborsi'"
+            [ngClass]="vistaAttiva === 'rimborsi'
+              ? 'px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg bg-[#09637E] text-white transition-all'
+              : 'px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-slate-500 hover:text-slate-700 transition-all'">
+            <span class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Rimborsi
+            </span>
+          </button>
+          <button type="button" (click)="vistaAttiva = 'interventi'"
+            [ngClass]="vistaAttiva === 'interventi'
+              ? 'px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg bg-[#09637E] text-white transition-all'
+              : 'px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-slate-500 hover:text-slate-700 transition-all'">
+            <span class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              Interventi
+            </span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+          <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+          Aggiornamento auto
+        </div>
+      </div>
+
+      <!-- Barra ricerca -->
+      <div class="relative group">
+        <svg class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#088395] transition-colors"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchTerm"
+          placeholder="Cerca per titolo, stato o ID sinistro..."
+          class="w-full pl-12 pr-4 py-4 rounded-2xl border border-[#7AB2B2]/30 focus:outline-none focus:ring-4 focus:ring-[#088395]/10 focus:border-[#088395] transition-all bg-white shadow-sm font-medium text-slate-700 placeholder-slate-400"/>
+      </div>
+    </div>
+
+    <!-- SPINNER -->
+    <div *ngIf="loadingPratiche" class="bg-white p-10 rounded-2xl shadow-sm border border-[#7AB2B2]/30 text-center text-slate-400">
+      <svg class="w-6 h-6 animate-spin mx-auto mb-3 text-[#7AB2B2]" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <p class="text-xs font-black uppercase tracking-widest">Caricamento pratiche...</p>
+    </div>
+
+    <!-- LISTA PRATICHE -->
+    <div *ngIf="!loadingPratiche">
+
+      <!-- Vuoto -->
+      <div *ngIf="praticheFiltrate.length === 0"
+           class="bg-white p-10 rounded-2xl shadow-sm border border-[#7AB2B2]/30 text-center text-slate-400">
+        <svg class="w-12 h-12 mx-auto mb-3 text-[#7AB2B2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="text-xs font-black uppercase tracking-widest">
+          {{ searchTerm ? 'Nessun risultato per "' + searchTerm + '"' : 'Nessuna pratica disponibile' }}
+        </p>
+      </div>
+
+      <!-- Cards -->
+      <div *ngIf="praticheFiltrate.length > 0" class="space-y-4">
+        <div *ngFor="let p of praticheFiltrate"
+             class="bg-white p-6 rounded-2xl shadow-sm border border-[#7AB2B2]/30 hover:border-[#088395] transition-all group">
+
+          <!-- Header pratica -->
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div class="flex items-center gap-4">
+              <div class="bg-[#EBF4F6] p-3 rounded-xl text-[#7AB2B2] group-hover:bg-[#09637E] group-hover:text-white transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-black text-[#09637E] uppercase text-sm tracking-tight">{{ p.titolo ?? 'Pratica senza titolo' }}</p>
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">
+                  Sinistro: #{{ p.sinistro_id }}
+                  <ng-container *ngIf="p.perito_id"> &nbsp;·&nbsp; Perito: #{{ p.perito_id }}</ng-container>
+                </p>
+              </div>
+            </div>
+            <span class="text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest border"
+              [ngClass]="getStatoClass(p.stato)">
+              {{ getStatoLabel(p.stato) }}
+            </span>
+          </div>
+
+          <!-- Descrizione -->
+          <div *ngIf="p.descrizione" class="bg-[#EBF4F6] rounded-xl p-4 mb-4">
+            <p class="text-xs font-bold text-slate-500">{{ p.descrizione }}</p>
+          </div>
+
+          <!-- Info extra -->
+          <div class="flex items-center gap-6 text-[10px] text-slate-400 font-black uppercase tracking-widest mb-5 flex-wrap">
+            <span *ngIf="p.stima_danno">
+              <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Stima: € {{ p.stima_danno | number:'1.2-2' }}
+            </span>
+            <span *ngIf="p.esito">
+              <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Esito: {{ p.esito }}
+            </span>
+            <span *ngIf="p.id_officina">
+              <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/>
+              </svg>
+              Officina: #{{ p.id_officina }}
+            </span>
+            <span *ngIf="p.data_aggiornamento">
+              <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Aggiornata: {{ p.data_aggiornamento | date:'d MMM yyyy' }}
+            </span>
+          </div>
+
+          <!-- ── SEZIONE RIMBORSO ── -->
+          <div *ngIf="vistaAttiva === 'rimborsi'">
+            <button type="button" (click)="apriRimborso(p, $event)"
+              class="flex items-center gap-2 bg-[#09637E] hover:bg-[#088395] text-white font-black text-[10px] uppercase tracking-[0.15em] py-2.5 px-5 rounded-xl transition-all shadow-sm shadow-[#09637E]/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ p.stima_danno ? 'Modifica Rimborso' : 'Registra Rimborso' }}
+            </button>
+
+            <!-- Form rimborso inline -->
+            <div *ngIf="praticaSelezionataRimborso?._id === p._id"
+                 (click)="$event.stopPropagation()"
+                 class="mt-4 bg-white border-2 border-[#09637E]/20 rounded-2xl p-6 shadow-lg">
+
+              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Inserisci Dati Rimborso</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+                    Stima Danno (€) <span class="text-red-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#7AB2B2] font-bold text-sm">€</span>
+                    <input type="number" [(ngModel)]="rimborsoForm.stima_danno"
+                      placeholder="0.00"
+                      class="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-[#F4F4F4] focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all"/>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+                    Esito <span class="text-red-500">*</span>
+                  </label>
+                  <select [(ngModel)]="rimborsoForm.esito"
+                    class="w-full py-3 px-4 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-[#F4F4F4] focus:outline-none focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all appearance-none">
+                    <option value="" disabled>— Seleziona esito —</option>
+                    <option *ngFor="let e of esitiDisponibili" [value]="e">{{ e }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div *ngIf="rimborsoErrore" class="mb-3 text-xs text-red-600 font-semibold p-3 bg-red-50 rounded-xl border border-red-200">
+                {{ rimborsoErrore }}
+              </div>
+              <div *ngIf="rimborsoSuccesso" class="mb-3 text-xs text-green-600 font-semibold p-3 bg-green-50 rounded-xl border border-green-200">
+                {{ rimborsoSuccesso }}
+              </div>
+
+              <div class="flex items-center justify-between">
+                <button type="button" (click)="chiudiRimborso()"
+                  class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
+                  Annulla
+                </button>
+                <button type="button" (click)="inviaRimborso()"
+                  [disabled]="loadingRimborso"
+                  class="flex items-center gap-2 py-2.5 px-6 bg-[#09637E] text-white text-[10px] font-extrabold rounded-xl shadow transition-all hover:bg-[#088395] disabled:opacity-40 disabled:cursor-not-allowed">
+                  <svg *ngIf="loadingRimborso" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  {{ loadingRimborso ? 'Salvataggio...' : 'Conferma Rimborso' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SEZIONE INTERVENTO ── -->
+          <div *ngIf="vistaAttiva === 'interventi'">
+            <button type="button" (click)="apriIntervento(p, $event)"
+              class="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-black text-[10px] uppercase tracking-[0.15em] py-2.5 px-5 rounded-xl transition-all shadow-sm shadow-orange-500/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+              {{ p.id_officina ? 'Modifica Intervento' : 'Assegna Intervento' }}
+            </button>
+
+            <!-- Form intervento inline -->
+            <div *ngIf="praticaSelezionataIntervento?._id === p._id"
+                 (click)="$event.stopPropagation()"
+                 class="mt-4 bg-white border-2 border-orange-200 rounded-2xl p-6 shadow-lg">
+
+              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Assegna Officina</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+                    ID Officina <span class="text-red-500">*</span>
+                  </label>
+                  <input type="text" [(ngModel)]="interventoForm.id_officina"
+                    placeholder="Es. 1, 2, 3..."
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-[#F4F4F4] focus:outline-none focus:ring-2 focus:ring-orange-400/20 focus:border-orange-400 transition-all"/>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+                    Data Inizio Lavori
+                  </label>
+                  <input type="date" [(ngModel)]="interventoForm.data_inizio_lavori"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-[#F4F4F4] focus:outline-none focus:ring-2 focus:ring-orange-400/20 focus:border-orange-400 transition-all"/>
+                </div>
+              </div>
+
+              <div *ngIf="interventoErrore" class="mb-3 text-xs text-red-600 font-semibold p-3 bg-red-50 rounded-xl border border-red-200">
+                {{ interventoErrore }}
+              </div>
+              <div *ngIf="interventoSuccesso" class="mb-3 text-xs text-green-600 font-semibold p-3 bg-green-50 rounded-xl border border-green-200">
+                {{ interventoSuccesso }}
+              </div>
+
+              <div class="flex items-center justify-between">
+                <button type="button" (click)="chiudiIntervento()"
+                  class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
+                  Annulla
+                </button>
+                <button type="button" (click)="inviaIntervento()"
+                  [disabled]="loadingIntervento"
+                  class="flex items-center gap-2 py-2.5 px-6 bg-orange-500 text-white text-[10px] font-extrabold rounded-xl shadow transition-all hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed">
+                  <svg *ngIf="loadingIntervento" class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  {{ loadingIntervento ? 'Assegnando...' : 'Conferma Intervento' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

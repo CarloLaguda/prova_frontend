@@ -1,0 +1,1154 @@
+<div class="min-h-screen bg-[#F4F4F4] text-[#061E29] font-sans overflow-x-hidden">
+
+  <!-- ===== HEADER sticky ===== -->
+  <header class="sticky top-0 z-30 bg-[#088395] border-b-2 border-[#09637E] shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 flex items-center h-14 gap-1">
+
+      <button (click)="setView('dashboard')"
+        [ngClass]="currentView === 'dashboard'
+          ? 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-[#09637E] bg-[#D0EBF0] flex items-center gap-2 transition-all'
+          : 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-white hover:text-white hover:bg-white/20 flex items-center gap-2 transition-all'">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+        @if (pendingClaimsCount > 0) {
+          <span class="inline-flex items-center justify-center w-5 h-5 text-[9px] font-black
+                       bg-amber-500 text-white rounded-full leading-none shadow">
+            {{ pendingClaimsCount }}
+          </span>
+        }
+      </button>
+
+      <button (click)="setView('archivio')"
+        [ngClass]="currentView === 'archivio'
+          ? 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-[#09637E] bg-[#D0EBF0] flex items-center gap-2 transition-all'
+          : 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-white hover:text-white hover:bg-white/20 flex items-center gap-2 transition-all'">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+        </svg>
+        Archivio
+      </button>
+
+      <button (click)="setView('relazioni')"
+        [ngClass]="currentView === 'relazioni'
+          ? 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-[#09637E] bg-[#D0EBF0] flex items-center gap-2 transition-all'
+          : 'px-4 py-2 text-xs font-black uppercase tracking-widest rounded-lg text-white hover:text-white hover:bg-white/20 flex items-center gap-2 transition-all'">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Relazioni
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
+
+    <!-- ===== SPINNER ===== -->
+    @if (isLoading) {
+      <div class="flex flex-col items-center justify-center py-32 gap-4">
+        <div class="w-10 h-10 border-4 border-[#09637E]/20 border-t-[#09637E] rounded-full animate-spin"></div>
+        <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Caricamento pratiche...</p>
+      </div>
+    }
+
+    @if (!isLoading) {
+
+      <!-- ===== DASHBOARD ===== -->
+      @if (currentView === 'dashboard') {
+
+        <!-- Benvenuto -->
+        <div class="animate-fade-down">
+          <h1 class="text-3xl font-black tracking-tight text-slate-900">
+            BENTORNATO, <span class="text-[#09637E]">{{ user.full_name }}</span>
+          </h1>
+          <p class="text-sm text-slate-500 font-semibold mt-1">Riepilogo pratiche assegnate e perizie attive</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-down delay-1">
+
+          <!-- Da Accettare -->
+          <div class="bg-white p-5 px-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4
+                      border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-baseline gap-2">
+                <p class="text-3xl font-black text-slate-900">{{ pendingClaimsCount }}</p>
+                @if (pendingClaimsCount > 0) {
+                  <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                    Nuove
+                  </span>
+                }
+              </div>
+              <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Da Accettare</p>
+            </div>
+          </div>
+
+          <!-- Pratiche in Corso -->
+          <div class="bg-white p-5 px-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4
+                      border-l-4 border-l-[#09637E] hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-[#EBF4F6] text-[#09637E] rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-baseline gap-2">
+                <p class="text-3xl font-black text-slate-900">{{ activeClaimsCount }}</p>
+                <span class="text-xs font-bold text-[#09637E] bg-[#EBF4F6] px-2 py-0.5 rounded-full border border-[#7AB2B2]">Attive</span>
+              </div>
+              <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pratiche in Corso</p>
+            </div>
+          </div>
+
+          <!-- Perizie Redatte -->
+          <div class="bg-white p-5 px-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4
+                      border-l-4 border-l-[#7AB2B2] hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-[#EBF4F6] text-[#7AB2B2] rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-3xl font-black text-slate-900">{{ relazioniCount }}</p>
+              <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Perizie Redatte</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── BARRA DI RICERCA DASHBOARD ── -->
+        <div class="animate-fade-down delay-2">
+          <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+            <div class="relative flex-1">
+              <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <input [(ngModel)]="dashboardSearch" type="text"
+                placeholder="Cerca per codice, veicolo, luogo, compagnia..."
+                class="w-full pl-9 pr-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300
+                       rounded-lg bg-[#F4F4F4] text-slate-900 outline-none transition-all
+                       focus:border-[#09637E] focus:bg-white focus:ring-[3px] focus:ring-[#09637E]/[0.08]
+                       placeholder:text-slate-400"/>
+            </div>
+            @if (dashboardSearch) {
+              <button (click)="dashboardSearch = ''"
+                class="flex items-center gap-1.5 px-3 py-2 text-xs font-black text-slate-500
+                       bg-slate-100 border border-slate-300 rounded-lg hover:text-red-600
+                       hover:border-red-300 hover:bg-red-50 transition-all uppercase">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancella
+              </button>
+            }
+            <div class="hidden sm:flex items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-wider
+                        border-l border-slate-200 pl-3">
+              <div class="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+              Aggiornamento auto
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SEZIONE: Da Accettare ── -->
+        <div class="space-y-4 animate-fade-down delay-2">
+          <div class="flex items-center gap-3 px-1">
+            <h2 class="text-xl font-black tracking-tight text-slate-800">Pratiche Da Accettare</h2>
+            @if (pendingClaims.length > 0) {
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black
+                           bg-amber-100 text-amber-800 border border-amber-300">
+                {{ pendingClaims.length }}
+              </span>
+            }
+          </div>
+
+          @if (pendingClaims.length === 0) {
+            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+              @if (dashboardSearch) {
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <p class="text-sm font-black text-slate-400">Nessuna pratica trovata per "{{ dashboardSearch }}"</p>
+              } @else {
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm font-black text-slate-400">Nessuna pratica in attesa di accettazione</p>
+                <p class="text-xs text-slate-400 mt-1">Le nuove assegnazioni compariranno qui</p>
+              }
+            </div>
+          } @else {
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+              @for (item of pendingClaims; track item.id) {
+                <app-claim-card
+                  [claim]="item"
+                  [mode]="'pending'"
+                  (cardClick)="openClaimDetail($event)"
+                  (acceptClick)="openAcceptReject($event, 'accept')"
+                  (rejectClick)="openAcceptReject($event, 'reject')">
+                </app-claim-card>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- ── SEZIONE: Pratiche in Corso ── -->
+        <div class="space-y-4 animate-fade-down delay-3">
+          <div class="flex items-center gap-3 px-1">
+            <h2 class="text-xl font-black tracking-tight text-slate-800">Pratiche in Corso</h2>
+            @if (activeClaims.length > 0) {
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black
+                           bg-[#EBF4F6] text-[#09637E] border border-[#7AB2B2]">
+                {{ activeClaims.length }}
+              </span>
+            }
+          </div>
+
+          @if (activeClaims.length === 0) {
+            <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+              @if (dashboardSearch) {
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <p class="text-sm font-black text-slate-400">Nessuna pratica trovata per "{{ dashboardSearch }}"</p>
+              } @else {
+                <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm font-black text-slate-400">Nessuna pratica in corso</p>
+                <p class="text-xs text-slate-400 mt-1">Accetta le pratiche assegnate per iniziare</p>
+              }
+            </div>
+          } @else {
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+              @for (item of activeClaims; track item.id) {
+                <app-claim-card
+                  [claim]="item"
+                  (cardClick)="openClaimDetail($event)"
+                  (deleteClick)="askDeleteClaim($event)">
+                </app-claim-card>
+              }
+            </div>
+          }
+        </div>
+
+      }
+
+      <!-- ===== ARCHIVIO ===== -->
+      @if (currentView === 'archivio') {
+        <div class="animate-fade-down">
+
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-black tracking-tight text-slate-900">Archivio Pratiche Perizionate</h2>
+              <p class="text-xs text-slate-500 font-bold mt-1">
+                {{ archivedEntries.length }} {{ archivedEntries.length === 1 ? 'pratica con perizia redatta' : 'pratiche con perizia redatta' }}
+              </p>
+            </div>
+            <button (click)="resetFilters()"
+              class="flex items-center gap-2 px-4 py-2 text-xs font-black text-slate-500 bg-white border
+                     border-slate-300 rounded-lg hover:border-red-300 hover:text-red-600 transition-all uppercase shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Reset Filtri
+            </button>
+          </div>
+
+          <!-- Filtri archivio -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 mb-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 shadow-sm">
+            <div class="col-span-2">
+              <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Cerca</label>
+              <div class="relative">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input [(ngModel)]="filterSearch" type="text" placeholder="Codice, veicolo, luogo..."
+                  class="w-full pl-9 pr-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                         text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white focus:ring-[3px] focus:ring-[#09637E]/[0.08]
+                         placeholder:text-slate-400"/>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Stato</label>
+              <select [(ngModel)]="filterStatus"
+                class="w-full px-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                       text-slate-900 outline-none transition-all appearance-none focus:border-[#09637E] focus:bg-white">
+                <option value="">Tutti</option>
+                <option value="in_valutazione">In Valutazione</option>
+                <option value="in_perizia">In Corso</option>
+                <option value="approvato">Approvato</option>
+                <option value="chiuso">Chiuso</option>
+                <option value="in_attesa">In Attesa</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Priorità</label>
+              <select [(ngModel)]="filterPriority"
+                class="w-full px-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                       text-slate-900 outline-none transition-all appearance-none focus:border-[#09637E] focus:bg-white">
+                <option value="">Tutte</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="bassa">Bassa</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Dal</label>
+              <input [(ngModel)]="filterDateFrom" type="date"
+                class="w-full px-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                       text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white"/>
+            </div>
+            <div>
+              <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Al</label>
+              <input [(ngModel)]="filterDateTo" type="date"
+                class="w-full px-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                       text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white"/>
+            </div>
+          </div>
+
+          <!-- Tabella archivio -->
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full table-fixed">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-200">
+                  <th class="w-12 px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Tipo</th>
+                  <th class="w-28 px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Codice</th>
+                  <th class="px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Veicolo</th>
+                  <th class="px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Perizia</th>
+                  <th class="w-28 px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Stima</th>
+                  <th class="w-32 px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Conclusione</th>
+                  <th class="w-28 px-4 py-3 text-left text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Stato Perizia</th>
+                  <th class="w-28 px-4 py-3 text-center text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of archivedEntries; track entry.claim.id) {
+                  <tr class="border-b border-slate-100 hover:bg-[#EBF4F6]/40 transition-colors group cursor-pointer"
+                      (click)="openArchivedEntry(entry)">
+                    <td class="px-4 py-3.5">
+                      <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500
+                                  group-hover:bg-[#EBF4F6] group-hover:text-[#09637E] transition-colors">
+                        @if (getVehicleType(entry.claim.vehicle) === 'motorcycle') {
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="17" r="2" stroke-width="1.8"/><circle cx="19" cy="17" r="2" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 17l1.5-5h7l3-4h2l1.5 4-3 1"/></svg>
+                        } @else if (getVehicleType(entry.claim.vehicle) === 'truck') {
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="1" y="3" width="13" height="13" rx="1" stroke-width="1.8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 7h4l3 3v6h-7V7z"/><circle cx="6" cy="19" r="2" stroke-width="1.8"/><circle cx="18" cy="19" r="2" stroke-width="1.8"/></svg>
+                        } @else {
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17h5"/></svg>
+                        }
+                      </div>
+                    </td>
+                    <td class="px-4 py-3.5 text-[0.8rem] font-black text-[#09637E] truncate">{{ entry.claim.code }}</td>
+                    <td class="px-4 py-3.5">
+                      <span class="block truncate px-2.5 py-0.5 bg-[#EBF4F6] border border-[#7AB2B2] rounded-md text-[0.7rem] font-semibold text-[#09637E]">{{ entry.claim.vehicle }}</span>
+                    </td>
+                    <td class="px-4 py-3.5 text-[0.8rem] text-slate-700 font-semibold truncate">{{ entry.relazione.title }}</td>
+                    <td class="px-4 py-3.5 text-[0.8rem] font-black text-[#088395]">
+                      @if (entry.relazione.estimatedDamage) { € {{ entry.relazione.estimatedDamage | number }} }
+                      @else { <span class="text-slate-400">—</span> }
+                    </td>
+                    <td class="px-4 py-3.5">
+                      @if (entry.relazione.conclusione) {
+                        <span [class]="'inline-flex items-center px-2 py-0.5 rounded text-[0.6rem] font-black uppercase tracking-[0.06em] border ' + getConclusioneClass(entry.relazione.conclusione)">
+                          {{ entry.relazione.conclusione }}
+                        </span>
+                      } @else { <span class="text-slate-400 text-xs">—</span> }
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded text-[0.6rem] font-black uppercase tracking-[0.06em] ' + getRelazioneStatusClass(entry.relazione.status)">
+                        {{ entry.relazione.status }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3.5 text-center">
+                      <div class="flex items-center justify-center gap-1.5">
+                        <button (click)="exportRelazione(entry.relazione, $event)"
+                          class="inline-flex items-center gap-1 px-2 py-1.5 bg-[#EBF4F6] text-[#09637E] text-[10px] font-black
+                                 rounded-lg hover:bg-[#09637E] hover:text-white transition-all uppercase border border-[#7AB2B2]" title="Esporta PDF">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                          </svg>
+                        </button>
+                        <button (click)="askDeleteRelazione(entry.relazione, $event)"
+                          class="inline-flex items-center p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-500 hover:text-white transition-all border border-red-200" title="Elimina">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+                @if (archivedEntries.length === 0) {
+                  <tr>
+                    <td colspan="8" class="py-16 text-center">
+                      <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                      <p class="text-sm font-black text-slate-400">Nessuna pratica con perizia redatta</p>
+                      <button (click)="resetFilters()" class="mt-3 text-xs font-black text-[#088395] hover:underline">Rimuovi i filtri</button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- ===== RELAZIONI ===== -->
+      @if (currentView === 'relazioni') {
+        <div class="animate-fade-down">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-black tracking-tight text-slate-900">Relazioni Peritali</h2>
+            <button (click)="openNewRelazione()"
+              class="flex items-center gap-2 px-4 py-2 text-xs font-black text-white bg-[#09637E] rounded-lg
+                     hover:bg-[#088395] transition-all uppercase shadow-lg shadow-[#09637E]/20">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              Nuova Relazione
+            </button>
+          </div>
+
+          @if (isRelazioniLoading) {
+            <div class="flex items-center justify-center py-20 gap-3">
+              <div class="w-8 h-8 border-4 border-[#09637E]/20 border-t-[#09637E] rounded-full animate-spin"></div>
+              <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Caricamento relazioni...</p>
+            </div>
+          } @else if (relazioni.length === 0) {
+            <div class="bg-white rounded-2xl border border-slate-200 p-16 text-center shadow-sm">
+              <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <p class="text-sm font-black text-slate-400">Nessuna relazione redatta</p>
+            </div>
+          } @else {
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+              @for (rel of relazioni; track rel.id) {
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer p-5"
+                     (click)="openRelazioneDetail(rel)">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="w-10 h-10 bg-[#EBF4F6] text-[#09637E] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                      </svg>
+                    </div>
+                    <span [class]="'text-[10px] font-black px-2.5 py-1 rounded-lg ' + getRelazioneStatusClass(rel.status)">{{ rel.status }}</span>
+                  </div>
+                  <p class="text-xs font-black text-[#09637E] mb-1">{{ rel.claimCode }}</p>
+                  <h3 class="text-sm font-black text-slate-800 mb-1 truncate">{{ rel.title }}</h3>
+                  <p class="text-xs text-slate-500 font-semibold mb-3">{{ rel.vehicle }}</p>
+                  @if (rel.estimatedDamage) {
+                    <p class="text-lg font-black text-[#088395]">€ {{ rel.estimatedDamage | number }}</p>
+                  }
+                  <div class="flex gap-2 mt-4 pt-4 border-t border-slate-200">
+                    <button (click)="$event.stopPropagation(); openRelazioneDetail(rel)"
+                      class="flex-1 py-2 text-[10px] font-black text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-100 transition-all uppercase">
+                      Modifica
+                    </button>
+                    <button (click)="exportRelazione(rel, $event)"
+                      class="flex-1 py-2 text-[10px] font-black text-[#09637E] border border-[#7AB2B2] bg-[#EBF4F6] rounded-lg hover:bg-[#7AB2B2]/30 transition-all uppercase">
+                      Esporta PDF
+                    </button>
+                    <button (click)="askDeleteRelazione(rel, $event)"
+                      class="py-2 px-3 text-[10px] font-black text-red-600 border border-red-200 bg-red-50 rounded-lg hover:bg-red-500 hover:text-white transition-all">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+    }
+  </main>
+
+  <!-- ===== POPUP ACCETTA / RIFIUTA ===== -->
+  @if (confirmActionClaim) {
+    <div class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <div (click)="cancelAcceptReject()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="relative bg-white rounded-2xl shadow-2xl p-7 w-full max-w-sm modal-pop">
+
+        @if (confirmActionClaim.action === 'accept') {
+          <div class="w-14 h-14 bg-[#EBF4F6] rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-[#09637E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-black text-slate-800 text-center mb-1">Accetta Pratica</h3>
+          <p class="text-sm text-slate-500 text-center mb-1">Vuoi prendere in carico la pratica</p>
+          <p class="text-sm font-black text-[#09637E] text-center mb-1">{{ confirmActionClaim.claim.code }}</p>
+          <p class="text-xs text-slate-500 text-center mb-2">{{ confirmActionClaim.claim.vehicle }}</p>
+          <div class="bg-[#EBF4F6] border border-[#7AB2B2] rounded-xl p-3 mb-6 text-center">
+            <p class="text-[11px] font-semibold text-slate-700">
+              La pratica passerà nello stato <span class="font-black text-[#09637E]">In Corso</span>
+              e potrai procedere con la perizia.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button (click)="cancelAcceptReject()" [disabled]="isProcessingAction"
+              class="flex-1 py-2.5 text-xs font-black text-slate-600 border border-slate-300 rounded-xl
+                     hover:bg-slate-100 disabled:opacity-50 transition-all uppercase">
+              Annulla
+            </button>
+            <button (click)="doAcceptReject()" [disabled]="isProcessingAction"
+              class="flex-1 py-2.5 text-xs font-black text-white bg-[#09637E] rounded-xl
+                     hover:bg-[#088395] disabled:opacity-50 transition-all uppercase shadow-lg shadow-[#09637E]/20
+                     flex items-center justify-center gap-2">
+              @if (isProcessingAction) {
+                <div class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              } @else {
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+              }
+              Accetta
+            </button>
+          </div>
+
+        } @else {
+          <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-black text-slate-800 text-center mb-1">Rifiuta Pratica</h3>
+          <p class="text-sm text-slate-500 text-center mb-1">Sei sicuro di voler rifiutare</p>
+          <p class="text-sm font-black text-slate-800 text-center mb-1">{{ confirmActionClaim.claim.code }}</p>
+          <p class="text-xs text-slate-500 text-center mb-2">{{ confirmActionClaim.claim.vehicle }}</p>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-6 text-center">
+            <p class="text-[11px] font-semibold text-red-700">
+              La pratica tornerà disponibile per la riassegnazione da parte della compagnia assicurativa.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button (click)="cancelAcceptReject()" [disabled]="isProcessingAction"
+              class="flex-1 py-2.5 text-xs font-black text-slate-600 border border-slate-300 rounded-xl
+                     hover:bg-slate-100 disabled:opacity-50 transition-all uppercase">
+              Annulla
+            </button>
+            <button (click)="doAcceptReject()" [disabled]="isProcessingAction"
+              class="flex-1 py-2.5 text-xs font-black text-white bg-red-500 rounded-xl
+                     hover:bg-red-600 disabled:opacity-50 transition-all uppercase
+                     flex items-center justify-center gap-2">
+              @if (isProcessingAction) {
+                <div class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              }
+              Rifiuta
+            </button>
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+
+  <!-- ===== CLAIM DETAIL MODAL ===== -->
+  @if (isClaimDetailOpen && selectedClaim) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div (click)="closeClaimDetail()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col modal-pop overflow-hidden max-h-[92vh]">
+
+        <div class="px-7 py-5 border-b border-slate-200 flex items-start justify-between bg-gradient-to-r from-[#EBF4F6] via-white to-white">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 bg-[#09637E] text-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#09637E]/25">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17h5"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h2 class="text-xl font-black text-slate-900 tracking-tight">{{ selectedClaim.code }}</h2>
+                <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded text-[0.6rem] font-black uppercase tracking-[0.06em] border ' + getStatusClass(selectedClaim.status)">
+                  {{ getStatusLabel(selectedClaim.status) }}
+                </span>
+              </div>
+              <p class="text-xs font-bold text-slate-500 mt-0.5 uppercase tracking-wider">{{ selectedClaim.type }} · {{ selectedClaim.date }}</p>
+            </div>
+          </div>
+          <button (click)="closeClaimDetail()" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+          <div class="p-7 grid grid-cols-1 lg:grid-cols-2 gap-x-7 gap-y-6">
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">Priorità Pratica</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button (click)="updateClaimPriority(selectedClaim, 'alta')"
+                    [ngClass]="selectedClaim.priority === 'alta'
+                      ? 'py-2 text-xs font-black rounded-lg border-2 border-red-500 bg-red-50 text-red-700 transition-all uppercase'
+                      : 'py-2 text-xs font-black rounded-lg border-2 border-slate-200 bg-white text-slate-500 hover:border-red-300 hover:text-red-600 transition-all uppercase'">Alta</button>
+                  <button (click)="updateClaimPriority(selectedClaim, 'media')"
+                    [ngClass]="selectedClaim.priority === 'media'
+                      ? 'py-2 text-xs font-black rounded-lg border-2 border-orange-400 bg-orange-50 text-orange-700 transition-all uppercase'
+                      : 'py-2 text-xs font-black rounded-lg border-2 border-slate-200 bg-white text-slate-500 hover:border-orange-300 hover:text-orange-600 transition-all uppercase'">Media</button>
+                  <button (click)="updateClaimPriority(selectedClaim, 'bassa')"
+                    [ngClass]="selectedClaim.priority === 'bassa'
+                      ? 'py-2 text-xs font-black rounded-lg border-2 border-green-500 bg-green-50 text-green-700 transition-all uppercase'
+                      : 'py-2 text-xs font-black rounded-lg border-2 border-slate-200 bg-white text-slate-500 hover:border-green-300 hover:text-green-600 transition-all uppercase'">Bassa</button>
+                </div>
+              </div>
+
+              <div class="bg-[#F4F4F4] rounded-xl p-4 space-y-3.5 border border-slate-200">
+                <div class="flex justify-between items-start text-sm">
+                  <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Veicolo</span>
+                  <span class="font-bold text-slate-800 text-right ml-4">{{ selectedClaim.vehicle }}</span>
+                </div>
+                <div class="h-px bg-slate-200"></div>
+                <div class="flex justify-between items-start text-sm">
+                  <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Luogo</span>
+                  <span class="font-bold text-slate-800 text-right ml-4 max-w-[220px]">{{ selectedClaim.location }}</span>
+                </div>
+                <div class="h-px bg-slate-200"></div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Data & Ora</span>
+                  <span class="font-bold text-slate-800">{{ selectedClaim.date }} · {{ selectedClaim.time }}</span>
+                </div>
+                @if (selectedClaim.insuranceCompany && selectedClaim.insuranceCompany !== 'N/D') {
+                  <div class="h-px bg-slate-200"></div>
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Compagnia</span>
+                    <span class="font-bold text-slate-800">{{ selectedClaim.insuranceCompany }}</span>
+                  </div>
+                }
+                @if (selectedClaim.amount) {
+                  <div class="h-px bg-slate-200"></div>
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="text-xs font-black text-slate-600 uppercase tracking-wider">Stima Danno</span>
+                    <span class="text-lg font-black text-[#088395]">€ {{ selectedClaim.amount | number }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Mappa -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Posizione Sinistro</label>
+                  @if (mapCoords) {
+                    <a [href]="getOsmLink(mapCoords)" target="_blank" rel="noopener"
+                      class="text-[10px] font-black text-[#09637E] hover:underline flex items-center gap-1">
+                      Apri in mappa
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                      </svg>
+                    </a>
+                  }
+                </div>
+                @if (isGeocodingLocation) {
+                  <div class="bg-[#F4F4F4] border border-slate-200 rounded-xl p-6 flex items-center justify-center gap-3">
+                    <div class="w-4 h-4 border-2 border-[#09637E]/30 border-t-[#09637E] rounded-full animate-spin"></div>
+                    <span class="text-xs font-bold text-slate-500">Ricerca posizione...</span>
+                  </div>
+                } @else if (mapCoords) {
+                  <div class="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <iframe [src]="getMapUrl(mapCoords)" class="w-full h-64 block" loading="lazy" title="Mappa"></iframe>
+                    <div class="px-3 py-2.5 bg-white border-t border-slate-200 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5 text-[#09637E] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      <p class="text-[11px] font-semibold text-slate-700 truncate">{{ selectedSinistro?.luogo ?? selectedClaim.location }}</p>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="bg-[#F4F4F4] border border-slate-200 rounded-xl p-5 text-center">
+                    <p class="text-xs font-bold text-slate-400">Posizione non geolocalizzabile</p>
+                    <p class="text-[10px] text-slate-500 mt-1">{{ selectedSinistro?.luogo ?? selectedClaim.location }}</p>
+                  </div>
+                }
+              </div>
+
+              <div>
+                <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">Note Perizia</label>
+                <textarea rows="3" placeholder="Aggiungi note o osservazioni sul sinistro..."
+                  class="w-full px-3.5 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-slate-300 rounded-xl bg-slate-50
+                         text-slate-900 outline-none transition-all resize-none focus:border-[#09637E] focus:bg-white focus:ring-[3px] focus:ring-[#09637E]/[0.08]
+                         placeholder:text-slate-400"></textarea>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              @if (isLoadingSinistro) {
+                <div class="flex items-center gap-3 py-2">
+                  <div class="w-5 h-5 border-2 border-[#09637E]/30 border-t-[#09637E] rounded-full animate-spin flex-shrink-0"></div>
+                  <span class="text-xs font-bold text-slate-500">Caricamento dettagli sinistro...</span>
+                </div>
+              }
+              @if (!isLoadingSinistro && selectedSinistro) {
+                @if (selectedSinistro.descrizione) {
+                  <div>
+                    <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">Descrizione Sinistro</label>
+                    <p class="text-sm text-slate-700 font-medium bg-[#F4F4F4] rounded-xl p-3.5 leading-relaxed border border-slate-200">
+                      {{ selectedSinistro.descrizione }}
+                    </p>
+                  </div>
+                }
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Foto Sinistro</label>
+                    @if (selectedSinistro.immagini.length > 0) {
+                      <span class="text-[10px] font-black text-[#09637E] bg-[#EBF4F6] px-2.5 py-0.5 rounded-full border border-[#7AB2B2]">
+                        {{ selectedSinistro.immagini.length }} foto
+                      </span>
+                    }
+                  </div>
+                  @if (selectedSinistro.immagini.length === 0) {
+                    <div class="bg-[#F4F4F4] border border-slate-200 rounded-xl p-6 text-center">
+                      <p class="text-xs font-bold text-slate-400">Nessuna foto allegata</p>
+                    </div>
+                  } @else {
+                    <div class="grid grid-cols-3 gap-2">
+                      @for (img of selectedSinistro.immagini; track img.public_id) {
+                        <button (click)="openImage(img.url)"
+                          class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 group/img focus:outline-none">
+                          <img [src]="img.url" alt="Foto sinistro"
+                            class="w-full h-full object-cover transition-transform group-hover/img:scale-105 duration-300"/>
+                          <div class="absolute inset-0 bg-black/0 group-hover/img:bg-black/25 transition-colors flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white opacity-0 group-hover/img:opacity-100 transition-opacity drop-shadow"
+                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                            </svg>
+                          </div>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 mb-2">
+                    <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600">Analisi AI Danno</label>
+                    @if (selectedSinistro.analisiAi?.stato === 'in_elaborazione') {
+                      <div class="w-3.5 h-3.5 border-[2px] border-[#7AB2B2] border-t-[#088395] rounded-full animate-spin"></div>
+                    }
+                  </div>
+                  @if (selectedSinistro.analisiAi?.stato === 'completata') {
+                    <div class="bg-[#EBF4F6] border border-[#7AB2B2] rounded-xl p-4 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                          <div class="w-2 h-2 bg-[#EBF4F6]0 rounded-full"></div>
+                          <span class="text-[10px] font-black text-[#09637E] uppercase tracking-wide">Analisi completata</span>
+                        </div>
+                        @if (selectedSinistro.analisiAi?.modello) {
+                          <span class="text-[9px] text-[#088395] font-bold bg-white/70 px-2 py-0.5 rounded-full border border-[#7AB2B2]">
+                            {{ selectedSinistro.analisiAi?.modello }}
+                          </span>
+                        }
+                      </div>
+                      <p class="text-xs text-slate-700 leading-relaxed">{{ selectedSinistro.analisiAi?.testo }}</p>
+                    </div>
+                  } @else if (selectedSinistro.analisiAi?.stato === 'in_elaborazione') {
+                    <div class="bg-[#EBF4F6] border border-[#7AB2B2] rounded-xl p-4 flex items-center gap-3">
+                      <div class="w-8 h-8 bg-white/70 rounded-lg flex items-center justify-center flex-shrink-0 border border-[#7AB2B2]">
+                        <svg class="w-4 h-4 text-[#088395]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-xs font-black text-[#09637E]">Analisi AI in corso...</p>
+                        <p class="text-[10px] text-[#088395] mt-0.5">Aggiornamento automatico ogni 5 s</p>
+                      </div>
+                    </div>
+                  } @else if (selectedSinistro.analisiAi?.stato === 'errore') {
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-3.5">
+                      <div class="flex items-center gap-1.5 mb-1">
+                        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span class="text-[10px] font-black text-red-700 uppercase">Errore analisi AI</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="bg-[#F4F4F4] border border-slate-200 rounded-xl p-5 text-center">
+                      <p class="text-xs font-bold text-slate-400">Nessuna analisi AI disponibile</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="px-7 py-5 border-t border-slate-200 bg-[#F4F4F4] flex items-center justify-between gap-3">
+          <button (click)="askDeleteClaim(selectedClaim)"
+            class="py-2.5 px-4 text-xs font-black text-red-600 border border-red-200 bg-white rounded-xl
+                   hover:bg-red-500 hover:text-white hover:border-red-500 transition-all uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Elimina
+          </button>
+
+          @if (selectedClaim.status === 'assegnato') {
+            <div class="flex gap-3">
+              <button (click)="openAcceptReject(selectedClaim, 'reject'); closeClaimDetail()"
+                class="px-5 py-2.5 text-xs font-black text-red-600 border border-red-200 bg-white rounded-xl
+                       hover:bg-red-500 hover:text-white transition-all uppercase tracking-wider">
+                Rifiuta
+              </button>
+              <button (click)="openAcceptReject(selectedClaim, 'accept'); closeClaimDetail()"
+                class="px-7 py-2.5 text-xs font-black text-white bg-[#09637E] rounded-xl hover:bg-[#088395]
+                       transition-all uppercase tracking-wider shadow-lg shadow-[#09637E]/25 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+                Accetta Pratica
+              </button>
+            </div>
+          } @else {
+            <button (click)="openRelazioneFromClaim(selectedClaim)"
+              class="px-7 py-2.5 text-xs font-black text-white bg-[#09637E] rounded-xl hover:bg-[#088395]
+                     transition-all uppercase tracking-wider shadow-lg shadow-[#09637E]/25 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              Avvia Perizia
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== LIGHTBOX ===== -->
+  @if (lightboxUrl) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-6" (click)="closeLightbox()">
+      <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
+      <div class="relative max-w-4xl w-full flex flex-col items-center gap-3">
+        <div class="flex justify-end w-full">
+          <button (click)="closeLightbox()"
+            class="flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-black uppercase transition-colors
+                   px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Chiudi
+          </button>
+        </div>
+        <img [src]="lightboxUrl" alt="Foto sinistro ingrandita"
+          class="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl" (click)="$event.stopPropagation()"/>
+      </div>
+    </div>
+  }
+
+  <!-- ===== RELAZIONE MODAL ===== -->
+  @if (isRelazioneOpen) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div (click)="closeRelazione()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col modal-pop overflow-hidden max-h-[92vh]">
+        <div class="px-7 py-5 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-[#EBF4F6] via-white to-white">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 bg-[#09637E] text-white rounded-xl flex items-center justify-center shadow-lg shadow-[#09637E]/25 flex-shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-slate-900 tracking-tight">
+                {{ editingRelazione.id ? 'Modifica Relazione Peritale' : 'Nuova Relazione Peritale' }}
+              </h2>
+              <p class="text-xs font-bold text-slate-500 mt-0.5">
+                @if (editingRelazione.claimCode) {
+                  Riferimento pratica: <span class="text-[#09637E]">{{ editingRelazione.claimCode }}</span>
+                } @else {
+                  Compila tutti i campi per creare la relazione
+                }
+              </p>
+            </div>
+          </div>
+          <button (click)="closeRelazione()" class="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+          <div class="p-7">
+            @if (relazioneError) {
+              <div class="flex items-center gap-2 px-4 py-3 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-bold">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                {{ relazioneError }}
+              </div>
+            }
+
+            @if (editingLinkedClaim; as lc) {
+              <div class="mb-6 rounded-xl border border-[#7AB2B2] bg-gradient-to-br from-[#EBF4F6] to-white overflow-hidden">
+                <div class="p-4 flex items-center gap-4 border-b border-[#EBF4F6]">
+                  <div class="w-11 h-11 bg-white text-[#09637E] rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-[#7AB2B2]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17h5"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-baseline gap-2 flex-wrap">
+                      <p class="text-sm font-black text-[#09637E]">{{ lc.code }}</p>
+                      <span [class]="'inline-flex items-center px-2 py-0.5 rounded text-[0.55rem] font-black uppercase tracking-[0.06em] border ' + getStatusClass(lc.status)">{{ getStatusLabel(lc.status) }}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 font-semibold truncate mt-0.5">{{ lc.vehicle }}</p>
+                  </div>
+                  @if (lc.amount) {
+                    <div class="text-right flex-shrink-0">
+                      <p class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Stima Iniziale</p>
+                      <p class="text-base font-black text-[#088395]">€ {{ lc.amount | number }}</p>
+                    </div>
+                  }
+                </div>
+                <div class="px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2.5 text-[11px]">
+                  <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-0.5">Luogo</p>
+                    <p class="font-bold text-slate-800 truncate">{{ lc.location }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-0.5">Data Evento</p>
+                    <p class="font-bold text-slate-800">{{ lc.date }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-7 gap-y-5">
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Codice Sinistro</label>
+                  <select [(ngModel)]="editingRelazione.claimCode"
+                    class="w-full px-3 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-slate-300 rounded-xl bg-slate-50
+                           text-slate-900 outline-none transition-all appearance-none focus:border-[#09637E] focus:bg-white">
+                    <option value="">Seleziona sinistro...</option>
+                    @for (c of allClaims; track c.id) {
+                      <option [value]="c.code">{{ c.code }} — {{ c.vehicle }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Titolo Relazione</label>
+                  <input [(ngModel)]="editingRelazione.title" type="text" placeholder="Es. Perizia Collisione Frontale"
+                    class="w-full px-3 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-slate-300 rounded-xl bg-slate-50
+                           text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white placeholder:text-slate-400"/>
+                </div>
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Stima Danno (€)</label>
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#7AB2B2] font-bold text-sm">€</span>
+                    <input [(ngModel)]="editingRelazione.estimatedDamage" type="number" placeholder="0"
+                      class="w-full pl-8 pr-3 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-slate-300 rounded-xl bg-slate-50
+                             text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white"/>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">Tipo Danno</label>
+                  <div class="flex flex-wrap gap-2">
+                    @for (tipo of tipiDanno; track tipo) {
+                      <button (click)="editingRelazione.tipoDanno = tipo"
+                        [ngClass]="editingRelazione.tipoDanno === tipo
+                          ? 'px-3.5 py-1.5 text-xs font-black rounded-lg border-2 border-[#09637E] bg-[#EBF4F6] text-[#09637E] transition-all'
+                          : 'px-3.5 py-1.5 text-xs font-black rounded-lg border-2 border-slate-300 bg-white text-slate-600 hover:border-[#088395] hover:text-[#088395] transition-all'">
+                        {{ tipo }}
+                      </button>
+                    }
+                  </div>
+                  @if (isTipoDannoCustom) {
+                    <input [(ngModel)]="customTipoDanno" type="text" placeholder="Specifica tipo di danno..."
+                      class="mt-2.5 w-full px-3 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-[#09637E]/40 rounded-xl
+                             bg-[#EBF4F6]/30 text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white placeholder:text-slate-400"/>
+                  }
+                </div>
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">Conclusione Peritale</label>
+                  <div class="flex flex-wrap gap-2">
+                    @for (c of conclusioni; track c) {
+                      <button (click)="editingRelazione.conclusione = c"
+                        [ngClass]="editingRelazione.conclusione === c
+                          ? 'px-3.5 py-1.5 text-xs font-black rounded-lg border-2 border-[#09637E] bg-[#EBF4F6] text-[#09637E] transition-all'
+                          : 'px-3.5 py-1.5 text-xs font-black rounded-lg border-2 border-slate-300 bg-white text-slate-600 hover:border-[#088395] hover:text-[#088395] transition-all'">
+                        {{ c }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-2">
+                    Parti Danneggiate
+                    @if ((editingRelazione.partiDanneggiate?.length ?? 0) > 0) {
+                      <span class="ml-1.5 text-[#09637E]">({{ editingRelazione.partiDanneggiate?.length }})</span>
+                    }
+                  </label>
+                  @if ((editingRelazione.partiDanneggiate?.length ?? 0) > 0) {
+                    <div class="flex flex-wrap gap-2 mb-3 p-3 bg-[#EBF4F6] border border-[#7AB2B2] rounded-xl">
+                      @for (p of editingRelazione.partiDanneggiate; track $index) {
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-[#09637E] text-xs font-black rounded-lg border border-[#7AB2B2] shadow-sm">
+                          {{ p }}
+                          <button (click)="removeParte($index)" class="hover:text-red-600 transition-colors">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </button>
+                        </span>
+                      }
+                    </div>
+                  }
+                  <div class="flex gap-2 mb-3">
+                    <input [(ngModel)]="customParte" type="text"
+                      (keydown.enter)="addCustomParte(); $event.preventDefault()"
+                      placeholder="Aggiungi parte personalizzata..."
+                      class="flex-1 pl-3 pr-3 py-2 text-[0.8rem] font-semibold border-[1.5px] border-slate-300 rounded-lg bg-slate-50
+                             text-slate-900 outline-none transition-all focus:border-[#09637E] focus:bg-white placeholder:text-slate-400"/>
+                    <button (click)="addCustomParte()" type="button" [disabled]="!customParte?.trim()"
+                      class="px-4 py-2 text-xs font-black text-white bg-[#09637E] rounded-lg hover:bg-[#088395]
+                             disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all uppercase">
+                      Aggiungi
+                    </button>
+                  </div>
+                  <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-1.5">Oppure seleziona dalla lista</p>
+                  <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-1 pb-1">
+                    @for (p of partiDisponibili; track p) {
+                      @if (!(editingRelazione.partiDanneggiate ?? []).includes(p)) {
+                        <button (click)="addParte(p)"
+                          class="px-3 py-1 text-xs font-black text-slate-600 bg-slate-100 border border-slate-300 rounded-lg
+                                 hover:bg-[#EBF4F6] hover:text-[#09637E] hover:border-[#7AB2B2] transition-all">
+                          + {{ p }}
+                        </button>
+                      }
+                    }
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[0.65rem] font-black uppercase tracking-[0.07em] text-slate-600 mb-1.5">Descrizione Tecnica</label>
+                  <textarea [(ngModel)]="editingRelazione.description" rows="8"
+                    placeholder="Descrivi nel dettaglio i danni rilevati durante l'ispezione..."
+                    class="w-full px-3 py-2.5 text-[0.85rem] font-semibold border-[1.5px] border-slate-300 rounded-xl bg-slate-50
+                           text-slate-900 outline-none transition-all resize-none focus:border-[#09637E] focus:bg-white placeholder:text-slate-400"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-7 py-5 border-t border-slate-200 bg-[#F4F4F4] flex items-center justify-between gap-3">
+          <p class="text-[11px] font-semibold text-slate-500 hidden sm:block">
+            @if (editingRelazione.id) { Le modifiche verranno salvate sul server }
+            @else { La relazione verrà salvata come <span class="text-[#09637E] font-black">Bozza</span> }
+          </p>
+          <div class="flex gap-3 ml-auto">
+            <button (click)="closeRelazione()"
+              class="px-6 py-2.5 text-xs font-black text-slate-600 border border-slate-300 bg-white rounded-xl hover:bg-slate-100 transition-all uppercase">
+              Annulla
+            </button>
+            <button (click)="saveRelazione()"
+              class="px-8 py-2.5 text-xs font-black text-white bg-[#09637E] rounded-xl hover:bg-[#088395]
+                     transition-all uppercase shadow-lg shadow-[#09637E]/25 flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+              {{ editingRelazione.id ? 'Salva Modifiche' : 'Crea Relazione' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== CONFIRM DELETE PRATICA ===== -->
+  @if (confirmDeleteClaim) {
+    <div class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <div (click)="cancelDelete()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center modal-pop">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-black text-slate-800 mb-1">Rimuovi Pratica</h3>
+        <p class="text-sm text-slate-500 mb-5">
+          Sei sicuro di voler rimuovere <span class="font-black text-slate-800">{{ confirmDeleteClaim.code }}</span>?
+        </p>
+        <div class="flex gap-3">
+          <button (click)="cancelDelete()" class="flex-1 py-2.5 text-xs font-black text-slate-600 border border-slate-300 rounded-xl hover:bg-slate-100 transition-all uppercase">Annulla</button>
+          <button (click)="confirmDelete()" class="flex-1 py-2.5 text-xs font-black text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all uppercase">Rimuovi</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== CONFIRM DELETE RELAZIONE ===== -->
+  @if (confirmDeleteRelazione) {
+    <div class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+      <div (click)="cancelDeleteRel()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div class="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center modal-pop">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-black text-slate-800 mb-1">Elimina Relazione</h3>
+        <p class="text-sm text-slate-500 mb-5">
+          Sei sicuro di voler eliminare <span class="font-black text-slate-800">{{ confirmDeleteRelazione.title }}</span>?
+        </p>
+        <div class="flex gap-3">
+          <button (click)="cancelDeleteRel()" class="flex-1 py-2.5 text-xs font-black text-slate-600 border border-slate-300 rounded-xl hover:bg-slate-100 transition-all uppercase">Annulla</button>
+          <button (click)="confirmDeleteRel()" class="flex-1 py-2.5 text-xs font-black text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all uppercase">Elimina</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== TOAST NOTIFICATIONS (bottom-right) ===== -->
+  <div class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+    @for (toast of toasts; track toast.id) {
+      <div class="pointer-events-auto toast-enter flex items-center gap-3.5 px-4 py-3.5
+                  bg-white rounded-2xl shadow-2xl border-l-4 border-l-amber-500 border border-slate-200
+                  min-w-[290px] max-w-[340px]">
+        <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+          <svg class="w-4.5 h-4.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-black text-slate-900">{{ toast.message }}</p>
+          <p class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">{{ toast.sub }}</p>
+        </div>
+        <button (click)="dismissToast(toast.id)"
+          class="flex-shrink-0 p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+
+</div>

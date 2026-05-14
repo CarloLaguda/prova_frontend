@@ -1,0 +1,17 @@
+/* styles for NuovoSinistroComponent - most layout handled with Tailwind */
+
+/* ensure font consistency if needed */
+:host {
+  font-family: Inter, sans-serif;
+}
+
+/* Nasconde il testo nativo dell'input date */
+input[type="date"]::-webkit-datetime-edit {
+  color: transparent;
+}
+
+/* Fa sì che quando l'utente scrive o seleziona, il testo rimanga trasparente 
+   perché useremo un elemento finto sopra */
+input[type="date"]:focus::-webkit-datetime-edit {
+  color: transparent;
+}

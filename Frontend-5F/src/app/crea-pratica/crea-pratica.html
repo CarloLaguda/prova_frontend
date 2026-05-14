@@ -1,0 +1,109 @@
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="close()"></div>
+
+  <div (click)="$event.stopPropagation()"
+       class="w-full max-w-lg bg-white rounded-[40px] shadow-2xl shadow-blue-100/40 p-10 relative">
+
+    <!-- Close -->
+    <button type="button" (click)="close()" aria-label="Chiudi"
+            class="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <h2 class="text-2xl font-black mb-1 text-[#061E29]">Crea Pratica</h2>
+    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-8">
+      Sinistro: {{ sinistro.targa }}
+    </p>
+
+    <div class="flex flex-col gap-5">
+
+      <!-- Selezione Perito -->
+      <div>
+        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+          Perito <span class="text-red-500">*</span>
+        </label>
+
+        <!-- Loading periti -->
+        <div *ngIf="loadingPeriti"
+             class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-400 flex items-center gap-2">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          Caricamento periti...
+        </div>
+
+        <!-- Dropdown periti -->
+        <select
+          *ngIf="!loadingPeriti"
+          [(ngModel)]="peritoId"
+          class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all appearance-none cursor-pointer">
+          <option value="" disabled selected>Seleziona un perito...</option>
+          <option *ngFor="let p of periti" [value]="p.id">
+            {{ p.nome }} {{ p.cognome }}
+          </option>
+        </select>
+
+        <!-- Errore caricamento periti -->
+        <p *ngIf="errorPeriti" class="mt-1 text-[10px] text-red-500 font-semibold">
+          <i class="bi bi-exclamation-triangle me-1"></i>{{ errorPeriti }}
+        </p>
+      </div>
+
+      <!-- Titolo -->
+      <div>
+        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+          Titolo <span class="text-red-500">*</span>
+        </label>
+        <input
+          [(ngModel)]="titolo"
+          type="text"
+          placeholder="Es. Perizia danni carrozzeria"
+          class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] placeholder-slate-300 focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all" />
+      </div>
+
+      <!-- Descrizione -->
+      <div>
+        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+          Descrizione <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          [(ngModel)]="descrizione"
+          rows="4"
+          placeholder="Descrizione dettagliata del danno..."
+          class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] placeholder-slate-300 focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all resize-none">
+        </textarea>
+      </div>
+
+      <!-- Feedback -->
+      <div *ngIf="error"
+           class="text-xs text-red-600 font-semibold p-3 bg-red-50 rounded-xl border border-red-100">
+        <i class="bi bi-exclamation-triangle me-1"></i> {{ error }}
+      </div>
+      <div *ngIf="success"
+           class="text-xs text-green-600 font-semibold p-3 bg-green-50 rounded-xl border border-green-100">
+        <i class="bi bi-check-circle me-1"></i> {{ success }}
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <button type="button" (click)="close()"
+                class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
+          Annulla
+        </button>
+        <button type="button" (click)="crea()"
+                [disabled]="!formValido || loading"
+                class="py-3 px-8 bg-[#09637E] text-white text-sm font-extrabold rounded-xl shadow-lg shadow-[#09637E]/20 transition-all hover:bg-[#088395] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+          <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          {{ loading ? 'Creazione...' : 'Crea Pratica' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

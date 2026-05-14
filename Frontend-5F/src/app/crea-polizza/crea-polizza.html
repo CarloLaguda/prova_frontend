@@ -1,0 +1,144 @@
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="close()"></div>
+
+  <div (click)="$event.stopPropagation()"
+       class="w-full max-w-lg bg-white rounded-[40px] shadow-2xl shadow-blue-100/40 p-10 relative">
+
+    <button type="button" 
+            (click)="close()" 
+            aria-label="Chiudi"
+            class="absolute top-6 right-6 p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <header class="mb-8">
+      <h2 class="text-2xl font-black mb-1 text-[#061E29]">Nuova Polizza</h2>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest">
+        Compila i dati della polizza assicurativa
+      </p>
+    </header>
+
+    <div class="flex flex-col gap-5">
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            N° Polizza <span class="text-red-500">*</span>
+          </label>
+          <input [(ngModel)]="formData.n_polizza" 
+                 type="text" 
+                 placeholder="POL-2024-001"
+                 class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] placeholder-slate-300 focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Compagnia Assicurativa
+          </label>
+          <input [(ngModel)]="formData.compagnia_assicurativa" 
+                 type="text" 
+                 readonly
+                 class="w-full bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] cursor-not-allowed" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+          Tipo Copertura <span class="text-red-500">*</span>
+        </label>
+        <select [(ngModel)]="formData.tipo_copertura"
+                required
+                class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all appearance-none cursor-pointer">
+          <option value="RCA">RCA</option>
+          <option value="Kasko">Kasko</option>
+          <option value="Full">Full</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Data Inizio <span class="text-red-500">*</span>
+            </label>
+            <input [(ngModel)]="formData.data_inizio" 
+                    type="text"
+                    placeholder="dd/mm/yyyy"
+                    required
+                    onfocus="(this.type='date')"
+                    onblur="if(!this.value)this.type='text'"
+                    class="date-input w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all" />
+        </div>
+        <div class="flex flex-col gap-1">
+        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Data Scadenza <span class="text-red-500">*</span>
+        </label>
+        <input [(ngModel)]="formData.data_scadenza" 
+                type="text"
+                placeholder="dd/mm/yyyy"
+                required
+                onfocus="(this.type='date')"
+                onblur="if(!this.value)this.type='text'"
+                class="date-input w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Massimale (€) <span class="text-red-500">*</span>
+          </label>
+          <input [(ngModel)]="formData.massimale" 
+                 type="number" 
+                 placeholder="100000"
+                 required
+                 class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] placeholder-slate-300 focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Veicolo <span class="text-red-500">*</span>
+          </label>
+          <select [(ngModel)]="formData.veicolo_id"
+                  required
+                  class="w-full bg-[#F4F4F4] border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-[#061E29] focus:outline-none focus:border-[#088395] focus:ring-2 focus:ring-[#088395]/20 transition-all appearance-none cursor-pointer">
+            <option [ngValue]="undefined" disabled>— Seleziona —</option>
+            <option *ngFor="let v of veicoliService.veicoli" [ngValue]="v.id">
+              {{ v.targa }} — {{ v.marca }} {{ v.modello }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" 
+           class="text-xs text-red-600 font-semibold p-3 bg-red-50 rounded-xl border border-red-100 mt-2">
+        <i class="bi bi-exclamation-triangle me-1"></i> {{ errorMessage }}
+      </div>
+      
+      <div *ngIf="successMessage" 
+           class="text-xs text-green-600 font-semibold p-3 bg-green-50 rounded-xl border border-green-100 mt-2">
+        <i class="bi bi-check-circle me-1"></i> {{ successMessage }}
+      </div>
+
+      <footer class="flex items-center justify-between pt-6 mt-2 border-t border-slate-100">
+        <button type="button" 
+                (click)="close()"
+                class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
+          Annulla
+        </button>
+
+        <button type="button" 
+                (click)="submit()" 
+                [disabled]="loading"
+                class="py-3 px-8 bg-[#09637E] text-white text-sm font-extrabold rounded-xl shadow-lg shadow-[#09637E]/20 transition-all hover:bg-[#088395] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+          <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          {{ loading ? 'Salvataggio...' : 'Salva Polizza' }}
+        </button>
+      </footer>
+    </div>
+  </div>
+</div>

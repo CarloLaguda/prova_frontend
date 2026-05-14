@@ -1,0 +1,358 @@
+<!-- ============================================================
+     SIDEBAR OVERLAY
+     ============================================================ -->
+<div
+  *ngIf="sidebarOpen"
+  class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-50 transition-all"
+  (click)="closeSidebar()"
+></div>
+
+<!-- SIDEBAR PANEL -->
+<div
+  *ngIf="!isAuthPage"
+  class="fixed top-0 right-0 h-full w-96 max-w-[92vw] bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col"
+  [class.translate-x-full]="!sidebarOpen"
+  [class.translate-x-0]="sidebarOpen"
+>
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
+    <div>
+      <h2 class="text-base font-black text-slate-900 tracking-tight">Profilo Utente</h2>
+      <p class="text-[11px] font-semibold text-slate-400 mt-0.5">Gestisci i tuoi dati</p>
+    </div>
+    <button (click)="closeSidebar()"
+      class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Contenuto scrollabile -->
+  <div class="flex-1 overflow-y-auto">
+
+    <!-- Card profilo -->
+    <div class="px-6 pt-6 pb-4">
+      <div class="relative bg-gradient-to-br from-[#09637E] to-[#0a7a9a] rounded-2xl p-5 text-white shadow-lg shadow-[#7AB2B2]/40 overflow-hidden">
+        <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full"></div>
+        <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-white/5 rounded-full"></div>
+
+        <div class="relative flex items-center gap-4">
+          <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-xl font-black border border-white/30">
+            {{ initials }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-black tracking-tight uppercase truncate">
+              {{ user?.nome }} {{ user?.cognome }}
+            </p>
+            <p class="text-xs text-white/70 font-semibold truncate mt-0.5">{{ user?.email }}</p>
+            <div class="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur px-2.5 py-1 rounded-full mt-2 border border-white/20">
+              <div class="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse"></div>
+              <span class="text-[10px] font-black uppercase tracking-widest">{{ roleLabel }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info / Edit -->
+    <div class="px-6 pb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Informazioni</h3>
+        <button *ngIf="!editMode"
+          (click)="enterEditMode()"
+          class="flex items-center gap-1.5 text-[11px] font-bold text-[#09637E] hover:text-[#074f65] px-2.5 py-1 rounded-lg hover:bg-[#09637E]/10 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Modifica
+        </button>
+      </div>
+
+      <!-- Messaggio successo -->
+      <div *ngIf="saveMessage && !editMode"
+        class="mb-3 flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-xl text-xs font-bold text-green-700">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+        {{ saveMessage }}
+      </div>
+
+      <!-- VIEW MODE -->
+      <div *ngIf="!editMode" class="space-y-2">
+        <div class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5">{{ user?.nome || '—' }}</p>
+        </div>
+        <div class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cognome</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5">{{ user?.cognome || '—' }}</p>
+        </div>
+        <div class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5 break-all">{{ user?.email || '—' }}</p>
+        </div>
+        <div class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Codice Fiscale</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5 font-mono tracking-wide">{{ user?.cf || '—' }}</p>
+        </div>
+        <div *ngIf="user?.id" class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Utente</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5 font-mono">#{{ user?.id }}</p>
+        </div>
+      </div>
+
+      <!-- EDIT MODE -->
+      <form *ngIf="editMode" (ngSubmit)="saveProfile()" class="space-y-3">
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nome</label>
+          <input type="text" name="nome" required
+            [(ngModel)]="editForm.nome"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Cognome</label>
+          <input type="text" name="cognome" required
+            [(ngModel)]="editForm.cognome"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email</label>
+          <input type="email" name="email" required
+            [(ngModel)]="editForm.email"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Codice Fiscale</label>
+          <input type="text" [value]="user?.cf" disabled
+            class="w-full px-4 py-2.5 bg-[#F4F4F4] border border-[#7AB2B2]/30 rounded-xl text-sm font-semibold text-[#5F9598] font-mono cursor-not-allowed" />
+          <p class="text-[10px] text-slate-400 mt-1 font-semibold">Il CF non può essere modificato</p>
+        </div>
+
+        <div *ngIf="saveError"
+          class="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ saveError }}
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button type="button" (click)="cancelEdit()" [disabled]="savingProfile"
+            class="flex-1 px-4 py-2.5 bg-[#F4F4F4] hover:bg-[#EBF4F6] rounded-xl text-sm font-bold text-[#061E29] transition-all disabled:opacity-50">
+            Annulla
+          </button>
+          <button type="submit" [disabled]="savingProfile"
+            class="flex-1 px-4 py-2.5 bg-[#09637E] hover:bg-[#074f65] rounded-xl text-sm font-black text-white shadow-lg shadow-[#7AB2B2]/40 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg *ngIf="savingProfile" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            {{ savingProfile ? 'Salvataggio...' : 'Salva' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ============================================================
+         SEZIONE CONTRATTI — visibile solo per automobilisti
+         ============================================================ -->
+    <ng-container *ngIf="isAutomobilista && !editMode">
+
+      <div class="mx-6 border-t border-slate-100 mb-4"></div>
+
+      <div class="px-6 pb-6">
+
+        <!-- Titolo sezione -->
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 bg-[#EBF4F6] text-[#09637E] rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest">I Miei Contratti</h3>
+        </div>
+
+        <!-- Skeleton loading -->
+        <div *ngIf="polizzeLoading" class="space-y-3">
+          <div class="h-20 bg-slate-100 rounded-xl animate-pulse"></div>
+          <div class="h-20 bg-slate-100 rounded-xl animate-pulse"></div>
+        </div>
+
+        <!-- Nessuna polizza -->
+        <div *ngIf="!polizzeLoading && polizzeConVeicolo.length === 0"
+          class="text-center py-6 bg-[#F4F4F4] rounded-xl border border-dashed border-slate-200">
+          <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p class="text-[11px] font-black text-slate-400 uppercase tracking-wide">Nessun contratto attivo</p>
+        </div>
+
+        <!-- Lista polizze -->
+        <div *ngIf="!polizzeLoading && polizzeConVeicolo.length > 0" class="space-y-3">
+
+          <div *ngFor="let item of polizzeConVeicolo"
+            class="rounded-xl border overflow-hidden"
+            [ngClass]="isPolizzaAttiva(item.polizza)
+              ? 'border-[#7AB2B2]/40 bg-white'
+              : 'border-red-200 bg-red-50/40'">
+
+            <!-- Header card polizza -->
+            <div class="px-4 py-3 flex items-center justify-between"
+              [ngClass]="isPolizzaAttiva(item.polizza) ? 'bg-[#EBF4F6]' : 'bg-red-100/60'">
+
+              <div class="flex items-center gap-2.5">
+                <!-- Icona veicolo -->
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                  [ngClass]="isPolizzaAttiva(item.polizza) ? 'bg-[#09637E] text-white' : 'bg-red-400 text-white'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 17a2 2 0 100-4 2 2 0 000 4zm8 0a2 2 0 100-4 2 2 0 000 4zM3 9l1.5-4.5h15L21 9M3 9h18M3 9l-1 6h20l-1-6"/>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-[11px] font-black text-slate-700 uppercase tracking-wide">
+                    {{ item.veicolo ? item.veicolo.marca + ' ' + item.veicolo.modello : 'Veicolo' }}
+                  </p>
+                  <p class="text-[10px] font-bold text-slate-500 font-mono">
+                    {{ item.veicolo?.targa || '—' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Badge stato -->
+              <span class="text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-widest flex items-center gap-1"
+                [ngClass]="isPolizzaAttiva(item.polizza)
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-red-100 text-red-600 border border-red-200'">
+                <span class="w-1.5 h-1.5 rounded-full inline-block"
+                  [ngClass]="isPolizzaAttiva(item.polizza) ? 'bg-green-500 animate-pulse' : 'bg-red-400'"></span>
+                {{ isPolizzaAttiva(item.polizza) ? 'Attiva' : 'Scaduta' }}
+              </span>
+            </div>
+
+            <!-- Body card polizza -->
+            <div class="px-4 py-3 space-y-2">
+
+              <!-- N° polizza -->
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">N° Polizza</span>
+                <span class="text-[11px] font-black text-[#09637E] font-mono tracking-wider">{{ item.polizza.n_polizza }}</span>
+              </div>
+
+              <!-- Compagnia -->
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Compagnia</span>
+                <span class="text-[11px] font-bold text-slate-700 truncate max-w-[55%] text-right">
+                  {{ item.polizza.compagnia_assicurativa || '—' }}
+                </span>
+              </div>
+
+              <!-- Tipo copertura + massimale -->
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Copertura</span>
+                <span class="text-[11px] font-black text-[#09637E] bg-[#EBF4F6] px-2 py-0.5 rounded-full border border-[#7AB2B2]/40">
+                  {{ item.polizza.tipo_copertura || 'RCA' }}
+                </span>
+              </div>
+
+              <div *ngIf="item.polizza.massimale" class="flex items-center justify-between">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Massimale</span>
+                <span class="text-[11px] font-bold text-slate-700">
+                  € {{ item.polizza.massimale | number:'1.0-0' }}
+                </span>
+              </div>
+
+              <!-- Date -->
+              <div class="pt-2 mt-1 border-t border-slate-100 grid grid-cols-2 gap-2">
+                <div>
+                  <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Inizio</p>
+                  <p class="text-[11px] font-bold text-slate-600">
+                    {{ item.polizza.data_inizio | date:'dd/MM/yyyy' }}
+                  </p>
+                </div>
+                <div>
+                  <p class="text-[9px] font-black uppercase tracking-widest"
+                    [ngClass]="isPolizzaAttiva(item.polizza) ? 'text-slate-400' : 'text-red-400'">
+                    Scadenza
+                  </p>
+                  <p class="text-[11px] font-bold"
+                    [ngClass]="isPolizzaAttiva(item.polizza) ? 'text-slate-600' : 'text-red-600'">
+                    {{ item.polizza.data_scadenza | date:'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Countdown scadenza (solo se attiva) -->
+              <div *ngIf="isPolizzaAttiva(item.polizza)"
+                class="flex items-center gap-1.5 text-[10px] font-black rounded-lg px-2.5 py-1.5"
+                [ngClass]="giorniAllaScadenza(item.polizza) <= 30
+                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                  : 'bg-[#EBF4F6] text-[#09637E] border border-[#7AB2B2]/30'">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{{ giorniAllaScadenza(item.polizza) }} giorni alla scadenza</span>
+                <span *ngIf="giorniAllaScadenza(item.polizza) <= 30" class="ml-auto">⚠️</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+    <!-- fine sezione contratti -->
+
+  </div>
+
+  <!-- Footer Logout -->
+  <div class="px-6 pb-6 pt-4 border-t border-slate-100">
+    <button (click)="logout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 transition-all text-sm font-black border border-red-100">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      Disconnetti
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="bg-white border-b-2 border-[#7AB2B2] px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+  <button (click)="goHome()" class="flex items-center gap-2 cursor-pointer group">
+    <div class="bg-[#09637E] p-2 rounded-lg shadow-lg shadow-[#7AB2B2]/40 group-hover:bg-[#074f65] group-hover:scale-105 transition-all">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+    </div>
+    <span class="text-xl font-black tracking-tighter text-[#09637E] group-hover:text-[#074f65] transition-colors">SafeClaim</span>
+  </button>
+
+  <div class="flex items-center gap-3">
+    <ng-container *ngIf="!isAuthPage">
+      <button type="button" (click)="openSidebar()"
+        class="flex items-center gap-3 cursor-pointer group bg-[#EBF4F6] p-1.5 pr-4 rounded-xl hover:bg-[#7AB2B2]/20 transition-all border border-[#7AB2B2]/40 hover:border-[#7AB2B2]">
+        <div class="w-9 h-9 bg-[#09637E] rounded-lg flex items-center justify-center text-white font-black text-xs shadow-md shadow-[#7AB2B2]/20">
+          {{ initials }}
+        </div>
+        <div class="text-left hidden sm:block">
+          <p class="text-[10px] font-black text-[#5F9598] uppercase leading-none tracking-widest">{{ roleLabel }}</p>
+          <p class="text-xs font-bold text-[#061E29] mt-0.5">{{ user?.nome }} {{ user?.cognome }}</p>
+        </div>
+        <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </ng-container>
+  </div>
+</nav>
+
+<router-outlet></router-outlet>
+<app-assistente *ngIf="showAssistente"></app-assistente>

@@ -1,0 +1,72 @@
+<div class="fixed bottom-4 right-4 z-50" [style.width]="open ? '18rem' : '3.5rem'" [style.minWidth]="open ? '18rem' : 'auto'">
+  <div class="rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/30 overflow-hidden transition-all duration-300 ease-in-out">
+    <div *ngIf="open" class="flex items-center justify-between gap-2 px-3 py-2 bg-[#09637E] text-white">
+      <div class="flex items-center gap-2">
+        <div class="flex h-8 w-8 items-center justify-center rounded-3xl bg-white/15 text-base font-black">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
+            <path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7l-5 5V6a2 2 0 0 1 2-2Z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-black tracking-tight">SafeBot</p>
+          <p class="text-[10px] text-slate-100/90">Assistente SafeClaim</p>
+        </div>
+      </div>
+      <button type="button" (click)="toggleOpen()" class="text-white/80 hover:text-white text-[11px]">
+        Chiudi
+      </button>
+    </div>
+
+    <div *ngIf="open" class="flex h-[18rem] flex-col">
+      <div class="flex-1 overflow-y-auto bg-[#F4F4F4] p-3 space-y-2">
+        <div *ngFor="let message of messages" class="flex gap-3" [ngClass]="{ 'justify-end': message.role === 'user' }">
+          <div class="max-w-[85%] rounded-3xl px-4 py-3 text-sm leading-6" [ngClass]="{
+            'bg-[#09637E] text-white': message.role === 'assistant',
+            'bg-white border border-slate-200 text-slate-900': message.role === 'user'
+          }">
+            <strong *ngIf="message.role === 'assistant'" class="block text-xs uppercase tracking-[0.16em] text-slate-200 mb-1">Assistente</strong>
+            <strong *ngIf="message.role === 'user'" class="block text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">Tu</strong>
+            <p class="whitespace-pre-wrap">{{ message.text }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="error" class="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ error }}
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 bg-white p-3">
+        <label class="block text-[10px] font-black uppercase tracking-[0.24em] text-slate-400 mb-2">Fai una domanda</label>
+        <textarea
+          rows="2"
+          class="w-full resize-none rounded-3xl border border-slate-200 bg-[#F4F4F4] px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20"
+          placeholder="Scrivi qui la tua domanda..."
+          [(ngModel)]="query"
+          (keydown)="onKeydown($event)"></textarea>
+
+        <div class="mt-2 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-2xl bg-[#09637E] px-3 py-2 text-xs font-black text-white transition hover:bg-[#074f65] disabled:opacity-50"
+            (click)="submitQuestion()"
+            [disabled]="loading || !query.trim()">
+            <span *ngIf="!loading">Invia</span>
+            <span *ngIf="loading">Invio...</span>
+          </button>
+          <button
+            type="button"
+            class="text-[10px] font-semibold text-slate-500 hover:text-slate-700"
+            (click)="messages = [{ role: 'assistant', text: 'Ciao! Sono SafeBot, l’assistente virtuale SafeClaim. Chiedimi qualcosa e ti aiuto subito.' }]; error = ''">
+            Reset chat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button *ngIf="!open" type="button" class="flex h-12 w-12 items-center justify-center rounded-3xl bg-[#09637E] text-white shadow-lg shadow-slate-300/40 transition-colors duration-300 ease-in-out hover:bg-[#074f65]" (click)="toggleOpen()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
+        <path fill="currentColor" d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7l-5 5V6a2 2 0 0 1 2-2Z"/>
+      </svg>
+    </button>
+  </div>
+</div>

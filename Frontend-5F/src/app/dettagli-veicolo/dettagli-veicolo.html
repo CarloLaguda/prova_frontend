@@ -1,0 +1,74 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-6">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+  <div (click)="$event.stopPropagation()"
+       class="w-full max-w-lg bg-white rounded-[32px] shadow-2xl shadow-[#09637E]/10 relative overflow-hidden">
+
+    <!-- Header colorato -->
+    <div class="bg-gradient-to-r from-[#09637E] to-[#088395] px-8 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/20 p-3 rounded-xl">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17h5"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-white tracking-tight uppercase">
+            {{ veicolo.marca }} {{ veicolo.modello }}
+          </h2>
+          <span class="inline-block bg-white/20 text-white font-mono font-black text-xs px-3 py-0.5 rounded-lg mt-1">
+            {{ veicolo.targa }}
+          </span>
+        </div>
+      </div>
+      <button (click)="close()" aria-label="Chiudi"
+        class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-8 py-6 space-y-3">
+
+      <div class="flex items-center justify-between py-3 border-b border-slate-100">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Marca</span>
+        <span class="text-sm font-black text-[#09637E]">{{ veicolo.marca || '—' }}</span>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-b border-slate-100">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Modello</span>
+        <span class="text-sm font-bold text-slate-700">{{ veicolo.modello || '—' }}</span>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-b border-slate-100">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Targa</span>
+        <span class="font-mono font-black text-sm bg-[#EBF4F6] text-[#09637E] px-3 py-1 rounded-lg">
+          {{ veicolo.targa || '—' }}
+        </span>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-b border-slate-100">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Anno Immatricolazione</span>
+        <span class="text-sm font-bold text-slate-700">
+          {{ veicolo.anno_immatricolazione || '—' }}
+        </span>
+      </div>
+
+      <div class="flex items-center justify-between py-3">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Numero Telaio (VIN)</span>
+        <span class="text-sm font-mono font-bold text-slate-700">
+          {{ veicolo?.n_telaio || '—' }}
+        </span>
+      </div>
+
+    </div>
+
+
+
+  </div>
+</div>

@@ -1,0 +1,4 @@
+/* styles for GestioneRimborsiInterventi - layout handled with Tailwind */
+:host {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}

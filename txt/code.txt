@@ -1,0 +1,46 @@
+---------Eseguibili terminale angular--------------
+
+npm install -g @angular/cli
+
+npm install @angular/google-maps
+
+npm view @angular/google-maps@21.2.8 exports --json && npm view @angular/google-maps@21.2.8 version
+
+npm install
+
+ng serve     ng serve --host 0.0.0.0
+
+ng g m "modulo"
+
+ng g c "componente"
+
+npm install jspdf
+
+nvm install 22
+
+----------Esegiobili GitHub-------------------------
+
+git status
+
+git add . / *
+
+git commit -m "Descrizione"
+
+git push
+
+git pull (Sincronizza il Codespace con quello che c'è su GitHub)
+
+git checkout "nome-file.ts"
+
++----+----------+---------+-----------------+----------------------+--------------+-------------+-------------+
+|  1 | Perito1  | Rossi1  | CFPERITO0000001 | perito1@studiovr.it  | psw_perito1  | 45.00000000 |  9.00000000 |
+|  2 | Perito2  | Rossi2  | CFPERITO0000002 | perito2@studiovr.it  | psw_perito2  | 45.00000000 |  9.00000000 |
+|  3 | Perito3  | Rossi3  | CFPERITO0000003 | perito3@studiovr.it  | psw_perito3  | 45.00000000 |  9.00000000 |
+|  4 | Perito4  | Rossi4  | CFPERITO0000004 | perito4@studiovr.it  | psw_perito4  | 45.00000000 |  9.00000000 |
+|  5 | Perito5  | Rossi5  | CFPERITO0000005 | perito5@studiovr.it  | psw_perito5  | 45.00000000 |  9.00000000 |
+|  6 | Perito6  | Rossi6  | CFPERITO0000006 | perito6@studiovr.it  | psw_perito6  | 45.00000000 |  9.00000000 |
+|  7 | Perito7  | Rossi7  | CFPERITO0000007 | perito7@studiovr.it  | psw_perito7  | 45.00000000 |  9.00000000 |
+|  8 | Perito8  | Rossi8  | CFPERITO0000008 | perito8@studiovr.it  | psw_perito8  | 45.00000000 |  9.00000000 |
+|  9 | Perito9  | Rossi9  | CFPERITO0000009 | perito9@studiovr.it  | psw_perito9  | 45.00000000 |  9.00000000 |
+| 10 | Perito10 | Rossi10 | CFPERITO0000010 | perito10@studiovr.it | psw_perito10 | 45.00000000 |  9.00000000 |
++----+----------+---------+-----------------+----------------------+--------------+-------------+-------------+
