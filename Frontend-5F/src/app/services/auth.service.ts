@@ -25,21 +25,23 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(email_in: string, psw_in: string): Observable<any> {
-    return this.http.post<any>(`${this.link}login`, {
-      email: email_in,
-      password: psw_in
-    }).pipe(
-      tap(res => {
-        console.log("Risposta API Login:", res);
-        if (res.status === "success") {
-          this._currentUser = res.user;
-          localStorage.setItem('currentUser', JSON.stringify(res.user));
-          localStorage.setItem('userRole', res.user.ruolo);
-          console.log("Utente loggato:", this._currentUser);
-        }
-      })
-    );
-  }
+  return this.http.post<any>(`${this.link}login`, {
+    email: email_in,
+    password: psw_in
+  }).pipe(
+    tap(res => {
+      console.log("Risposta API Login:", res);
+      if (res.status === "success") {
+        this._currentUser = res.user;
+        localStorage.setItem('currentUser', JSON.stringify(res.user));
+        localStorage.setItem('userRole', res.user.ruolo);
+        localStorage.setItem('access_token', res.access_token);
+        localStorage.setItem('refresh_token', res.refresh_token);
+        console.log("Utente loggato:", this._currentUser);
+      }
+    })
+  );
+}
 
   signup(nuovoUtente: User): Observable<any> {
     const payload = {
@@ -81,5 +83,7 @@ export class AuthService {
     this._currentUser = undefined;
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   }
 }
