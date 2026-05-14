@@ -1,0 +1,28 @@
+# Dipendenze
+node_modules/
+../node_modules/
+
+# Cache Angular
+.angular/
+
+# Build output
+dist/
+
+# Ambiente
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log
+*.log
+npm-debug.log*
+
+# Test
+coverage/
