@@ -1,7 +1,7 @@
 /* ── SCROLLBAR INVISIBILE ─────────────────────────────────────────────────── */
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; }
-
+/**/
 /* ── ANIMAZIONI BASE ──────────────────────────────────────────────────────── */
 @keyframes fade-down {
   from { opacity: 0; transform: translateY(-12px); }
