@@ -67,6 +67,7 @@ export interface Toast {
   id:      number;
   message: string;
   sub:     string;
+  claim?:  Claim;
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -116,6 +117,7 @@ export class Perito implements OnInit, OnDestroy {
   toasts: Toast[]      = [];
   private toastCounter = 0;
   private previousPendingCount = -1;
+  private previousPendingIds   = new Set<string>();
 
   dashboardSearch = '';
 
@@ -181,7 +183,7 @@ export class Perito implements OnInit, OnDestroy {
   }
 
   private startAutoRefresh(): void {
-    this.refreshSub = timer(15000, 15000).subscribe(() => { this.loadClaims(); });
+    this.refreshSub = timer(45000, 45000).subscribe(() => { this.loadClaims(); });
   }
 
   ngOnDestroy(): void {
@@ -189,17 +191,29 @@ export class Perito implements OnInit, OnDestroy {
     this.refreshSub?.unsubscribe();
   }
 
-  private showNewClaimToast(newCount: number): void {
-    const id  = ++this.toastCounter;
-    const msg = newCount === 1 ? '1 nuova pratica assegnata' : `${newCount} nuove pratiche assegnate`;
-    this.toasts = [...this.toasts, { id, message: 'Nuova pratica!', sub: msg }];
+  private showNewClaimToast(claim: Claim): void {
+    const id = ++this.toastCounter;
+    this.toasts = [...this.toasts, {
+      id,
+      message: 'Nuova pratica assegnata!',
+      sub:     `${claim.code} · ${claim.vehicle}`,
+      claim,
+    }];
     this.cdr.detectChanges();
-    setTimeout(() => this.dismissToast(id), 5000);
+    setTimeout(() => this.dismissToast(id), 30000);
   }
 
   dismissToast(id: number): void {
     this.toasts = this.toasts.filter(t => t.id !== id);
     this.cdr.detectChanges();
+  }
+
+  openClaimFromToast(toast: Toast): void {
+    this.dismissToast(toast.id);
+    if (toast.claim) {
+      this.setView('dashboard');
+      this.openClaimDetail(toast.claim);
+    }
   }
 
   get pendingClaims(): Claim[] {
@@ -302,11 +316,15 @@ export class Perito implements OnInit, OnDestroy {
     const filtered = raw.filter(c =>
       !this.isExcluded(c, this.rejectedClaimIds) && !this.isExcluded(c, this.deletedClaimIds)
     );
-    const newPendingCount = filtered.filter(c => c.status === 'assegnato').length;
-    if (this.previousPendingCount >= 0 && newPendingCount > this.previousPendingCount) {
-      this.showNewClaimToast(newPendingCount - this.previousPendingCount);
+    const pendingNow = filtered.filter(c => c.status === 'assegnato');
+
+    if (this.previousPendingCount >= 0) {
+      const newlyClaimed = pendingNow.filter(c => !this.previousPendingIds.has(c.id));
+      newlyClaimed.forEach(c => this.showNewClaimToast(c));
     }
-    this.previousPendingCount = newPendingCount;
+
+    this.previousPendingIds   = new Set(pendingNow.map(c => c.id));
+    this.previousPendingCount = pendingNow.length;
     this.claims    = filtered;
     this.allClaims = [...filtered];
     this.isLoading = false;

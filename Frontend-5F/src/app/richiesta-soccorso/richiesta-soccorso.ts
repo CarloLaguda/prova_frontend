@@ -1,17 +1,10 @@
-import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../services/auth.service';
 import { VeicoliService } from '../services/veicoli.service';
+import { SoccorsoService, RichiestaSoccorso, SoccorsoPayload } from '../services/soccorso.service';
 import { Veicolo } from '../models/veicolo.model';
-
-interface RichiestaSoccorso {
-  id: number;
-  id_automobilista: number;
-  data_richiesta: string;
-  stato: string;
-}
 
 @Component({
   selector: 'app-richiesta-soccorso',
@@ -23,13 +16,8 @@ interface RichiestaSoccorso {
 export class RichiestaSoccorsoComponent implements OnInit {
   @Output() closed = new EventEmitter<void>();
 
-  private link = 'https://friendly-space-palm-tree-jjjxx4995v55hq9gw-7000.app.github.dev/';
-
-  // Header espliciti per evitare problemi CORS con Codespaces
-  private jsonHeaders = new HttpHeaders({
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  });
+  /** Passato da nuovo-sinistro: pre-collega la richiesta al sinistro appena creato */
+  @Input() sinistroId: string | null = null;
 
   // ── Veicoli ───────────────────────────────────────────────────────────────
   veicoli: Veicolo[] = [];
@@ -53,10 +41,10 @@ export class RichiestaSoccorsoComponent implements OnInit {
   loadingRichieste = false;
 
   constructor(
-    private http:           HttpClient,
-    private auth:           AuthService,
-    private veicoliService: VeicoliService,
-    private cdr:            ChangeDetectorRef,
+    private soccorsoService: SoccorsoService,
+    private auth:            AuthService,
+    private veicoliService:  VeicoliService,
+    private cdr:             ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -111,22 +99,18 @@ export class RichiestaSoccorsoComponent implements OnInit {
 
   caricaRichieste(userId: number): void {
     this.loadingRichieste = true;
-    this.http
-      .get<RichiestaSoccorso[]>(`${this.link}soccorso/utente/${userId}`, {
-        headers: this.jsonHeaders,
-      })
-      .subscribe({
-        next: (data) => {
-          this.richieste       = data;
-          this.loadingRichieste = false;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('[soccorso] Errore caricamento richieste:', err);
-          this.loadingRichieste = false;
-          this.cdr.detectChanges();
-        },
-      });
+    this.soccorsoService.getRichiesteUtente(userId).subscribe({
+      next: (data) => {
+        this.richieste        = data;
+        this.loadingRichieste = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('[soccorso] Errore caricamento richieste:', err);
+        this.loadingRichieste = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   // ── Invio richiesta ───────────────────────────────────────────────────────
@@ -146,47 +130,43 @@ export class RichiestaSoccorsoComponent implements OnInit {
 
     this.loading = true;
 
-    // Il backend calcola data_richiesta da solo con datetime.now()
-    // Non la inviamo per evitare conflitti di formato/timezone
-    const payload: Record<string, unknown> = {
+    const payload: SoccorsoPayload = {
       targa:           this.targaSelezionata,
+      id_sinistro:     this.sinistroId ?? null,
       orario_arrivo:   null,
       durata_soccorso: null,
       note:            '',
     };
 
-    if (this.lat !== null)               payload['lat'] = this.lat;
-    if (this.lon !== null)               payload['lon'] = this.lon;
-    if (this.indirizzoManuale?.trim())   payload['via'] = this.indirizzoManuale.trim();
+    if (this.lat !== null)             payload.lat = this.lat;
+    if (this.lon !== null)             payload.lon = this.lon;
+    if (this.indirizzoManuale?.trim()) payload.via = this.indirizzoManuale.trim();
 
-    this.http
-      .post<any>(`${this.link}soccorso`, payload, { headers: this.jsonHeaders })
-      .subscribe({
-        next: () => {
-          this.loading  = false;
-          this.successo = 'Richiesta inviata! Il soccorso è in arrivo.';
-          const userId = this.auth.currentUser?.id;
-          if (userId) this.caricaRichieste(userId);
-          this.cdr.detectChanges();
-          setTimeout(() => this.close(), 2500);
-        },
-        error: (err) => {
-          this.loading = false;
-          console.error('[soccorso] Errore invio:', {
-            status:     err.status,
-            statusText: err.statusText,
-            body:       err.error,
-            url:        err.url,
-          });
-          // Messaggio leggibile in base al tipo di errore
-          if (err.status === 0) {
-            this.errore = 'Impossibile raggiungere il server. Controlla la connessione.';
-          } else {
-            this.errore = err.error?.error ?? err.error?.message ?? 'Errore durante l\'invio. Riprova.';
-          }
-          this.cdr.detectChanges();
-        },
-      });
+    this.soccorsoService.inviaSoccorso(payload).subscribe({
+      next: () => {
+        this.loading  = false;
+        this.successo = 'Richiesta inviata! Il soccorso è in arrivo.';
+        const userId = this.auth.currentUser?.id;
+        if (userId) this.caricaRichieste(userId);
+        this.cdr.detectChanges();
+        setTimeout(() => this.close(), 2500);
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('[soccorso] Errore invio:', {
+          status:     err.status,
+          statusText: err.statusText,
+          body:       err.error,
+          url:        err.url,
+        });
+        if (err.status === 0) {
+          this.errore = 'Impossibile raggiungere il server. Controlla la connessione.';
+        } else {
+          this.errore = err.error?.error ?? err.error?.message ?? 'Errore durante l\'invio. Riprova.';
+        }
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

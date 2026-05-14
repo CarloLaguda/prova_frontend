@@ -12,6 +12,13 @@ import { AuthService } from '../services/auth.service';
 import { PolizzeService } from '../services/polizze.service';
 import { Sinistri } from '../services/sinistri.service';
 
+export interface AssicuratoreToast {
+  id:       number;
+  message:  string;
+  sub:      string;
+  pratica?: Pratica;
+}
+
 @Component({
   selector: 'app-assicurazione',
   standalone: true,
@@ -47,6 +54,12 @@ export class Assicurazione implements OnInit, OnDestroy {
   praticaPerAssegna: Pratica | null = null;
   peritoSelezionatoId = '';
   assegnando = false;
+
+  // ── Popup nuova pratica ───────────────────────────────────────────────────
+  toasts: AssicuratoreToast[]   = [];
+  private toastCounter          = 0;
+  private previousPraticheIds   = new Set<string>();
+  private isFirstPraticheLoad   = true;
 
   private refreshSubscription?: Subscription;
 
@@ -139,7 +152,7 @@ export class Assicurazione implements OnInit, OnDestroy {
   }
 
   startAutoRefresh(): void {
-    this.refreshSubscription = timer(0, 15000).subscribe(() => {
+    this.refreshSubscription = timer(0, 45000).subscribe(() => {
       this.caricaPratiche();
     });
   }
@@ -148,12 +161,49 @@ export class Assicurazione implements OnInit, OnDestroy {
     this.loadingPratiche = true;
     this.sinistri.getPratiche().subscribe({
       next: (res: any) => {
-        this.pratiche = res.pratiche || [];
+        const nuove: Pratica[] = res.pratiche || [];
         this.loadingPratiche = false;
+
+        if (!this.isFirstPraticheLoad) {
+          const nuovePratiche = nuove.filter(p => p._id && !this.previousPraticheIds.has(p._id));
+          nuovePratiche.forEach(p => this.showNuovaPraticaToast(p));
+        }
+
+        this.isFirstPraticheLoad  = false;
+        this.previousPraticheIds  = new Set(nuove.map(p => p._id!).filter(Boolean));
+        this.pratiche = nuove;
         this.cdr.detectChanges();
       },
-      error: () => this.loadingPratiche = false
+      error: () => { this.loadingPratiche = false; }
     });
+  }
+
+  private showNuovaPraticaToast(p: Pratica): void {
+    const id      = ++this.toastCounter;
+    const veicolo = p.veicolo_targa ?? p.veicolo ?? '—';
+    const tipo    = p.tipo_intervento ?? p.tipo_danno ?? p.titolo ?? 'Nuova pratica';
+    this.toasts = [...this.toasts, {
+      id,
+      message: 'Nuova pratica ricevuta!',
+      sub:     `${veicolo} · ${tipo}`,
+      pratica: p,
+    }];
+    this.cdr.detectChanges();
+    setTimeout(() => this.dismissToast(id), 30000);
+  }
+
+  dismissToast(id: number): void {
+    this.toasts = this.toasts.filter(t => t.id !== id);
+    this.cdr.detectChanges();
+  }
+
+  apriPraticaDaToast(toast: AssicuratoreToast): void {
+    this.dismissToast(toast.id);
+    if (toast.pratica) {
+      this.activeTab         = 'pratiche';
+      this.searchTerm        = '';
+      this.praticaSelezionata = toast.pratica;
+    }
   }
 
   caricaPolizze(): void {

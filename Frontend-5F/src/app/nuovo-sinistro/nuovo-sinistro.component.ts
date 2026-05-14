@@ -5,11 +5,12 @@ import { Sinistri } from '../services/sinistri.service';
 import { VeicoliService } from '../services/veicoli.service';
 import { AuthService } from '../services/auth.service';
 import { sinistro } from '../models/sinistro.model';
+import { RichiestaSoccorsoComponent } from '../richiesta-soccorso/richiesta-soccorso';
 
 @Component({
   selector: 'app-nuovo-sinistro',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RichiestaSoccorsoComponent],
   templateUrl: './nuovo-sinistro.component.html',
   styleUrl: './nuovo-sinistro.component.css',
 })
@@ -18,11 +19,18 @@ export class NuovoSinistroComponent implements OnInit {
   @Output() closed  = new EventEmitter<void>();
 
   formData = { targa: '', data_evento: '', descrizione: '', luogo: '', geolocalizzazione: { latitudine: 0, longitudine: 0 } };
-  maxDate       = '';
+  maxDate        = '';
   loading        = false;
   errorMessage   = '';
   warningMessage = '';
   successMessage = '';
+
+  // ── Soccorso ──────────────────────────────────────────────────────────────
+  showSoccorso  = false;
+  sinistroIdCreato: string | null = null;
+
+  apriSoccorso(): void  { this.showSoccorso = true; }
+  chiudiSoccorso(): void { this.showSoccorso = false; }
 
   constructor(
     private sinistriService: Sinistri,
@@ -104,10 +112,14 @@ export class NuovoSinistroComponent implements OnInit {
 
     this.sinistriService.createSinistro(payload).subscribe({
       next: (res: any) => {
-        this.loading        = false;
-        this.successMessage = "Sinistro e pratica creati con successo!";
+        this.loading           = false;
+        this.successMessage    = "Sinistro creato con successo!";
+        this.sinistroIdCreato  = res?.mongo_id ?? res?.id ?? null;
         this.created.emit(res);
-        setTimeout(() => this.close(), 1500);
+        // Non chiudiamo subito: l'utente può ancora richiedere soccorso
+        setTimeout(() => {
+          if (!this.showSoccorso) this.close();
+        }, 1500);
       },
       error: (err: any) => {
         this.loading      = false;

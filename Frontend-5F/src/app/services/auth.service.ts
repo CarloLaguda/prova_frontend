@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { User } from '../models/user.model';
 
@@ -64,9 +64,21 @@ export class AuthService {
     return this.http.post<any>(`${this.linkAssicurazione}registrazione-completa`, payload);
   }
 
+  cambiaPassword(userId: number, passwordAttuale: string, nuovaPassword: string): Observable<any> {
+    const token   = localStorage.getItem('access_token') ?? '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.put<any>(
+      `${this.link}utente/${userId}/password`,
+      { password_attuale: passwordAttuale, nuova_password: nuovaPassword },
+      { headers }
+    );
+  }
+
   updateUser(id: number, data: Partial<User>): Observable<any> {
     const ruolo = localStorage.getItem('userRole') ?? '';
-    return this.http.put<any>(`${this.link}utente/${id}`, { ...data, ruolo }).pipe(
+    const token = localStorage.getItem('access_token') ?? '';
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.put<any>(`${this.link}utente/${id}`, { ...data, ruolo }, { headers }).pipe(
       tap(res => {
         if (res?.status === 'success') {
           const updated = res.user

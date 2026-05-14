@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -18,7 +18,8 @@ export class RegistraClienteComponent implements OnInit {
   step: 1 | 2 | 3 = 1;
   loading    = false;
   errorMsg   = '';
-  successMsg = '';
+  successMsg        = '';
+  passwordGenerata  = '';
 
   readonly steps = [
     { label: 'Cliente', icon: 'bi-person'       },
@@ -30,7 +31,8 @@ export class RegistraClienteComponent implements OnInit {
   nuovoCliente = {
     nome: '', cognome: '', cf: '', email: '', telefono: '', password: '',
   };
-  showPassword = false;
+  showPassword    = false;
+  passwordCopiata = false;
 
   // ── STEP 2: dati veicolo ──────────────────────────────────────────────────
   formVeicolo = {
@@ -51,7 +53,7 @@ export class RegistraClienteComponent implements OnInit {
     tipo_copertura: 'RCA', data_inizio: '', data_scadenza: '', massimale: null,
   };
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.formPolizza.data_inizio = new Date().toISOString().split('T')[0];
@@ -80,7 +82,10 @@ export class RegistraClienteComponent implements OnInit {
     if (this.step > 1) this.step = (this.step - 1) as 1 | 2 | 3;
   }
 
-  chiudi(): void { this.closed.emit(); }
+  chiudi(): void {
+    if (this.loading) return;   // blocca la chiusura mentre la richiesta è in volo
+    this.closed.emit();
+  }
 
   // ── validazioni locali ────────────────────────────────────────────────────
 
@@ -124,8 +129,10 @@ export class RegistraClienteComponent implements OnInit {
   //  Se uno step fallisce, il DB esegue rollback automatico.
 
   private completaRegistrazione(): void {
-    this.loading  = true;
-    this.errorMsg = '';
+    this.loading          = true;
+    this.errorMsg         = '';
+    this.passwordGenerata = this.nuovoCliente.password;
+    this.cdr.detectChanges();   // forza subito la sparizione della X e del backdrop
 
     const u = this.authService.currentUser;
 
@@ -178,6 +185,39 @@ export class RegistraClienteComponent implements OnInit {
     setTimeout(() => {
       this.loading  = false;
       this.errorMsg = msg;
+    });
+  }
+
+  // ── generatore password casuale ──────────────────────────────────────────
+
+  generaPassword(): void {
+    const lettere = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numeri  = '0123456789';
+    const tutto   = lettere + numeri;
+    // garantisce almeno 1 lettera e 1 numero, poi riempie fino a 8 caratteri
+    let chars: string[] = [
+      lettere.charAt(Math.floor(Math.random() * lettere.length)),
+      numeri.charAt(Math.floor(Math.random() * numeri.length)),
+    ];
+    for (let i = 2; i < 8; i++) {
+      chars.push(tutto.charAt(Math.floor(Math.random() * tutto.length)));
+    }
+    // shuffle Fisher-Yates
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    this.nuovoCliente.password = chars.join('');
+    this.showPassword          = true;
+    this.passwordCopiata       = false;
+  }
+
+  copiaPassword(): void {
+    const pwd = this.passwordGenerata || this.nuovoCliente.password;
+    if (!pwd) return;
+    navigator.clipboard.writeText(pwd).then(() => {
+      this.passwordCopiata = true;
+      setTimeout(() => { this.passwordCopiata = false; }, 2000);
     });
   }
 

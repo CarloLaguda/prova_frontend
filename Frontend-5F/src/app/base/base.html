@@ -104,18 +104,22 @@
 
       <!-- EDIT MODE -->
       <form *ngIf="editMode" (ngSubmit)="saveProfile()" class="space-y-3">
+
+        <!-- Nome (read-only) -->
         <div>
           <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nome</label>
-          <input type="text" name="nome" required
-            [(ngModel)]="editForm.nome"
-            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+          <input type="text" [value]="user?.nome || ''" disabled
+            class="w-full px-4 py-2.5 bg-[#F4F4F4] border border-[#7AB2B2]/30 rounded-xl text-sm font-semibold text-slate-500 cursor-not-allowed" />
         </div>
+
+        <!-- Cognome (read-only) -->
         <div>
           <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Cognome</label>
-          <input type="text" name="cognome" required
-            [(ngModel)]="editForm.cognome"
-            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+          <input type="text" [value]="user?.cognome || ''" disabled
+            class="w-full px-4 py-2.5 bg-[#F4F4F4] border border-[#7AB2B2]/30 rounded-xl text-sm font-semibold text-slate-500 cursor-not-allowed" />
         </div>
+
+        <!-- Email (modificabile) -->
         <div>
           <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email</label>
           <input type="email" name="email" required
@@ -123,13 +127,120 @@
             class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
         </div>
 
+        <!-- CF (read-only) -->
         <div>
           <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Codice Fiscale</label>
-          <input type="text" [value]="user?.cf" disabled
+          <input type="text" [value]="user?.cf || ''" disabled
             class="w-full px-4 py-2.5 bg-[#F4F4F4] border border-[#7AB2B2]/30 rounded-xl text-sm font-semibold text-[#5F9598] font-mono cursor-not-allowed" />
           <p class="text-[10px] text-slate-400 mt-1 font-semibold">Il CF non può essere modificato</p>
         </div>
 
+        <!-- ── Sezione password ────────────────────────────────────────────── -->
+        <div class="border-t border-slate-100 pt-3">
+          <button type="button"
+            (click)="showPasswordSection = !showPasswordSection"
+            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black transition-all"
+            [ngClass]="showPasswordSection
+              ? 'bg-[#09637E]/10 text-[#09637E]'
+              : 'bg-[#F4F4F4] text-slate-500 hover:bg-[#EBF4F6] hover:text-[#09637E]'">
+            <span class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              Cambia password
+            </span>
+            <svg class="w-3.5 h-3.5 transition-transform"
+              [class.rotate-180]="showPasswordSection"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <div *ngIf="showPasswordSection" class="mt-3 space-y-2.5">
+
+            <!-- Password attuale -->
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Password attuale</label>
+              <div class="relative">
+                <input [type]="showPasswordAttuale ? 'text' : 'password'"
+                  name="passwordAttuale"
+                  [(ngModel)]="passwordAttuale"
+                  placeholder="••••••••"
+                  autocomplete="current-password"
+                  class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+                <button type="button" (click)="showPasswordAttuale = !showPasswordAttuale"
+                  class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-[#09637E] transition-colors">
+                  <svg *ngIf="!showPasswordAttuale" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showPasswordAttuale" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Nuova password -->
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nuova password</label>
+              <div class="relative">
+                <input [type]="showNuovaPassword ? 'text' : 'password'"
+                  name="nuovaPassword"
+                  [(ngModel)]="nuovaPassword"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+                <button type="button" (click)="showNuovaPassword = !showNuovaPassword"
+                  class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-[#09637E] transition-colors">
+                  <svg *ngIf="!showNuovaPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showNuovaPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Conferma nuova password -->
+            <div>
+              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Conferma nuova password</label>
+              <div class="relative">
+                <input [type]="showConfermaPassword ? 'text' : 'password'"
+                  name="confermaPassword"
+                  [(ngModel)]="confermaPassword"
+                  placeholder="••••••••"
+                  autocomplete="new-password"
+                  class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 transition-all"
+                  [class.border-red-400]="confermaPassword && nuovaPassword !== confermaPassword"
+                  [class.focus:ring-red-200]="confermaPassword && nuovaPassword !== confermaPassword"
+                  [class.border-green-400]="confermaPassword && nuovaPassword === confermaPassword"
+                  [class.focus:ring-green-200]="confermaPassword && nuovaPassword === confermaPassword"
+                  [class.border-slate-200]="!confermaPassword" />
+                <button type="button" (click)="showConfermaPassword = !showConfermaPassword"
+                  class="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-[#09637E] transition-colors">
+                  <svg *ngIf="!showConfermaPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg *ngIf="showConfermaPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                  </svg>
+                </button>
+              </div>
+              <p *ngIf="confermaPassword && nuovaPassword !== confermaPassword"
+                class="text-[10px] text-red-500 mt-1 font-semibold">Le password non coincidono</p>
+              <p *ngIf="confermaPassword && nuovaPassword === confermaPassword"
+                class="text-[10px] text-green-600 mt-1 font-semibold">Le password coincidono ✓</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Errore -->
         <div *ngIf="saveError"
           class="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
           <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

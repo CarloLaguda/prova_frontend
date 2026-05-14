@@ -44,7 +44,7 @@ export class ListaVeicoli implements OnInit, OnDestroy {
 
     this.refreshInterval = setInterval(() => {
       this.veicoliService.getVeicoliUtente(userId).subscribe();
-    }, 15000);
+    }, 45000);
   }
 
   ngOnDestroy(): void {

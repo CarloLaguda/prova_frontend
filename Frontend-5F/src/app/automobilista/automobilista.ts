@@ -63,7 +63,7 @@ export class Automobilista implements OnInit, OnDestroy {
   }
 
   startAutoRefresh(): void {
-    this.refreshSub = timer(0, 15000).subscribe(() => this.caricaDati());
+    this.refreshSub = timer(0, 45000).subscribe(() => this.caricaDati());
   }
 
   caricaDati(): void {
