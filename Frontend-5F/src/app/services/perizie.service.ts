@@ -11,8 +11,8 @@ import { Relazione, Claim } from '../perito/perito';
 })
 export class Perizie {
 
-  private praticheLink = 'https://friendly-space-palm-tree-jjjxx4995v55hq9gw-8000.app.github.dev/';
-  private sinistriLink = 'https://friendly-space-palm-tree-jjjxx4995v55hq9gw-7000.app.github.dev/';
+  private praticheLink = 'https://laughing-spoon-wrrww9446pq62954j-8000.app.github.dev/';
+  private sinistriLink = 'https://laughing-spoon-wrrww9446pq62954j-7000.app.github.dev/';
 
   constructor(public http: HttpClient) {}
 

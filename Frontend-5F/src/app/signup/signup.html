@@ -3,8 +3,7 @@
      Stile coerente con dashboard-assicuratore
      ============================================================ -->
 <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
-     (click)="chiudi()"
-     [class.pointer-events-none]="loading">
+     (click)="chiudi()">
 
   <div class="w-full max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-[32px] shadow-2xl border border-[#7AB2B2]/30 overflow-hidden"
        (click)="$event.stopPropagation()">
@@ -22,7 +21,7 @@
             <span *ngIf="step === 3">Crea Polizza</span>
           </h2>
         </div>
-        <button *ngIf="!loading" type="button" (click)="chiudi()"
+        <button type="button" (click)="chiudi()"
                 class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10
                        text-white/70 hover:bg-white/20 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
@@ -125,37 +124,13 @@
 
         <!-- Password -->
         <div class="flex flex-col gap-1.5">
-          <div class="flex items-center justify-between">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Password Temporanea *</label>
-            <button type="button" (click)="generaPassword()"
-              class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black
-                     bg-[#09637E]/10 text-[#09637E] hover:bg-[#09637E]/20 transition-all uppercase tracking-widest">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-              </svg>
-              Genera
-            </button>
-          </div>
+          <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Password Temporanea *</label>
           <div class="relative flex items-center">
             <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="nuovoCliente.password"
               placeholder="••••••••"
-              class="w-full pl-3 pr-24 py-2.5 text-sm rounded-xl border border-[#7AB2B2]/50 bg-[#F4F4F4]
+              class="w-full pl-3 pr-12 py-2.5 text-sm rounded-xl border border-[#7AB2B2]/50 bg-[#F4F4F4]
                      text-slate-800 placeholder-slate-300 font-medium focus:outline-none
                      focus:ring-2 focus:ring-[#09637E]/20 focus:border-[#09637E] transition-all"/>
-            <!-- Copia -->
-            <button type="button" (click)="copiaPassword()" *ngIf="nuovoCliente.password"
-              class="absolute right-11 h-full w-10 flex items-center justify-center
-                     text-slate-400 hover:text-[#09637E] transition-colors border-r border-slate-200">
-              <svg *ngIf="!passwordCopiata" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-              </svg>
-              <svg *ngIf="passwordCopiata" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="text-green-600" viewBox="0 0 16 16">
-                <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-              </svg>
-            </button>
-            <!-- Mostra/nascondi -->
             <button type="button" (click)="showPassword = !showPassword"
               class="absolute right-0 w-11 h-full flex items-center justify-center
                      text-slate-400 hover:text-[#09637E] transition-colors rounded-r-xl">
@@ -351,7 +326,7 @@
       </div>
 
       <!-- ══ SCHERMATA SUCCESSO ═════════════════════════════════════════════ -->
-      <div *ngIf="successMsg" class="flex flex-col items-center justify-center gap-5 py-8 text-center">
+      <div *ngIf="successMsg" class="flex flex-col items-center justify-center gap-5 py-10 text-center">
         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center shadow-md shadow-green-200/60">
           <i class="bi bi-check2-circle text-3xl text-green-600"></i>
         </div>
@@ -363,37 +338,6 @@
             Polizza {{ formPolizza.n_polizza }}
           </p>
         </div>
-
-        <!-- Password in chiaro da comunicare al cliente -->
-        <div class="w-full px-4 py-3.5 bg-amber-50 border border-amber-300 rounded-2xl text-left">
-          <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-            </svg>
-            Password temporanea — comunicala al cliente
-          </p>
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-xl font-black text-slate-800 tracking-[0.2em] select-all">{{ passwordGenerata }}</span>
-            <button type="button" (click)="copiaPassword()"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-              [class]="passwordCopiata
-                ? 'bg-green-100 text-green-700 border border-green-300'
-                : 'bg-amber-200 text-amber-800 hover:bg-amber-300 border border-amber-300'">
-              <svg *ngIf="!passwordCopiata" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-              </svg>
-              <svg *ngIf="passwordCopiata" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-              </svg>
-              {{ passwordCopiata ? 'Copiata!' : 'Copia' }}
-            </button>
-          </div>
-          <p class="text-[10px] text-amber-500 font-medium mt-2">
-            Il cliente dovrà cambiarla al primo accesso.
-          </p>
-        </div>
-
         <button type="button" (click)="chiudi()"
           class="px-8 py-2.5 bg-[#09637E] text-white rounded-xl text-sm font-black
                  hover:bg-[#088395] transition-all shadow-lg shadow-[#09637E]/20 uppercase tracking-widest">

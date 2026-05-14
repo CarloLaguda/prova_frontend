@@ -1,7 +1,9 @@
-import { Component, EventEmitter, Output, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { EmailService } from '../services/mail.service';
+
 
 @Component({
   selector: 'app-registra-cliente',
@@ -11,15 +13,17 @@ import { AuthService } from '../services/auth.service';
 })
 export class RegistraClienteComponent implements OnInit {
 
+
   @Output() created = new EventEmitter<any>();
   @Output() closed  = new EventEmitter<void>();
+
 
   // ── stato wizard ──────────────────────────────────────────────────────────
   step: 1 | 2 | 3 = 1;
   loading    = false;
   errorMsg   = '';
-  successMsg        = '';
-  passwordGenerata  = '';
+  successMsg = '';
+
 
   readonly steps = [
     { label: 'Cliente', icon: 'bi-person'       },
@@ -27,18 +31,20 @@ export class RegistraClienteComponent implements OnInit {
     { label: 'Polizza', icon: 'bi-shield-check' },
   ];
 
+
   // ── STEP 1: dati cliente ──────────────────────────────────────────────────
   nuovoCliente = {
     nome: '', cognome: '', cf: '', email: '', telefono: '', password: '',
   };
-  showPassword    = false;
-  passwordCopiata = false;
+  showPassword = false;
+
 
   // ── STEP 2: dati veicolo ──────────────────────────────────────────────────
   formVeicolo = {
     targa: '', marca: '', modello: '', n_telaio: '',
     anno_immatricolazione: new Date().getFullYear(),
   };
+
 
   // ── STEP 3: dati polizza ──────────────────────────────────────────────────
   formPolizza: {
@@ -53,10 +59,16 @@ export class RegistraClienteComponent implements OnInit {
     tipo_copertura: 'RCA', data_inizio: '', data_scadenza: '', massimale: null,
   };
 
-  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
+
+  constructor(
+    private authService:  AuthService,
+    private emailService: EmailService,
+  ) {}
+
 
   ngOnInit(): void {
     this.formPolizza.data_inizio = new Date().toISOString().split('T')[0];
+
 
     const u = this.authService.currentUser;
     if (u?.ruolo === 'assicuratore') {
@@ -64,30 +76,24 @@ export class RegistraClienteComponent implements OnInit {
     }
   }
 
+
   // ── navigazione tra step ──────────────────────────────────────────────────
+
 
   avanti(): void {
     this.errorMsg = '';
-
-    if (this.step === 1) {
-      if (this.validaCliente()) this.step = 2;
-    } else if (this.step === 2) {
-      if (this.validaVeicolo()) this.step = 3;
-    } else if (this.step === 3) {
-      if (this.validaPolizza()) this.completaRegistrazione();
-    }
+    if      (this.step === 1) { if (this.validaCliente()) this.step = 2; }
+    else if (this.step === 2) { if (this.validaVeicolo()) this.step = 3; }
+    else if (this.step === 3) { if (this.validaPolizza()) this.completaRegistrazione(); }
   }
 
-  indietro(): void {
-    if (this.step > 1) this.step = (this.step - 1) as 1 | 2 | 3;
-  }
 
-  chiudi(): void {
-    if (this.loading) return;   // blocca la chiusura mentre la richiesta è in volo
-    this.closed.emit();
-  }
+  indietro(): void { if (this.step > 1) this.step = (this.step - 1) as 1 | 2 | 3; }
+  chiudi():   void { this.closed.emit(); }
+
 
   // ── validazioni locali ────────────────────────────────────────────────────
+
 
   private validaCliente(): boolean {
     const { nome, cognome, cf, email, telefono, password } = this.nuovoCliente;
@@ -99,6 +105,7 @@ export class RegistraClienteComponent implements OnInit {
     return true;
   }
 
+
   private validaVeicolo(): boolean {
     const { targa, marca, modello, n_telaio } = this.formVeicolo;
     if (!targa.trim() || !marca.trim() || !modello.trim() || !n_telaio.trim()) {
@@ -107,6 +114,7 @@ export class RegistraClienteComponent implements OnInit {
     if (!this.targaValida(targa)) { this.errorMsg = 'Formato targa non valido. Esempio: AB123CD'; return false; }
     return true;
   }
+
 
   private validaPolizza(): boolean {
     const { n_polizza, compagnia_assicurativa, tipo_copertura, data_inizio, data_scadenza, massimale } = this.formPolizza;
@@ -119,22 +127,19 @@ export class RegistraClienteComponent implements OnInit {
     return true;
   }
 
-  // ── chiamata unica all'endpoint atomico ───────────────────────────────────
-  //
-  //  Il backend /registrazione-completa gestisce in una sola transazione:
-  //    1. INSERT Utente
-  //    2. INSERT Automobilista
-  //    3. INSERT Veicolo (con automobilista_id corretto)
-  //    4. INSERT Polizza
-  //  Se uno step fallisce, il DB esegue rollback automatico.
+
+  // ── registrazione completa ────────────────────────────────────────────────
+
 
   private completaRegistrazione(): void {
-    this.loading          = true;
-    this.errorMsg         = '';
-    this.passwordGenerata = this.nuovoCliente.password;
-    this.cdr.detectChanges();   // forza subito la sparizione della X e del backdrop
+    this.loading  = true;
+    this.errorMsg = '';
 
+
+    // Salviamo la password in chiaro PRIMA della chiamata (il payload la invia come hash)
+    const passwordInChiaro = this.nuovoCliente.password;
     const u = this.authService.currentUser;
+
 
     this.authService.registrazioneCompleta({
       utente: {
@@ -166,6 +171,20 @@ export class RegistraClienteComponent implements OnInit {
         setTimeout(() => {
           this.loading    = false;
           this.successMsg = 'Registrazione completata con successo!';
+
+
+          // ── Notifica credenziali al nuovo automobilista ─────────────────
+          this.emailService.notificaCredenziali({
+            nome:     this.nuovoCliente.nome,
+            email:    this.nuovoCliente.email,   // email reale dal form, non quella di test
+            password: passwordInChiaro,
+          }).subscribe({
+            next:  () => console.log('Email credenziali inviata a:', this.nuovoCliente.email),
+            error: (err) => console.warn('Email credenziali non inviata:', err),
+          });
+          // ────────────────────────────────────────────────────────────────
+
+
           this.created.emit(res);
         });
       },
@@ -181,51 +200,19 @@ export class RegistraClienteComponent implements OnInit {
     });
   }
 
+
   private gestisciErrore(msg: string): void {
-    setTimeout(() => {
-      this.loading  = false;
-      this.errorMsg = msg;
-    });
+    setTimeout(() => { this.loading = false; this.errorMsg = msg; });
   }
 
-  // ── generatore password casuale ──────────────────────────────────────────
-
-  generaPassword(): void {
-    const lettere = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numeri  = '0123456789';
-    const tutto   = lettere + numeri;
-    // garantisce almeno 1 lettera e 1 numero, poi riempie fino a 8 caratteri
-    let chars: string[] = [
-      lettere.charAt(Math.floor(Math.random() * lettere.length)),
-      numeri.charAt(Math.floor(Math.random() * numeri.length)),
-    ];
-    for (let i = 2; i < 8; i++) {
-      chars.push(tutto.charAt(Math.floor(Math.random() * tutto.length)));
-    }
-    // shuffle Fisher-Yates
-    for (let i = chars.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [chars[i], chars[j]] = [chars[j], chars[i]];
-    }
-    this.nuovoCliente.password = chars.join('');
-    this.showPassword          = true;
-    this.passwordCopiata       = false;
-  }
-
-  copiaPassword(): void {
-    const pwd = this.passwordGenerata || this.nuovoCliente.password;
-    if (!pwd) return;
-    navigator.clipboard.writeText(pwd).then(() => {
-      this.passwordCopiata = true;
-      setTimeout(() => { this.passwordCopiata = false; }, 2000);
-    });
-  }
 
   // ── helper template ───────────────────────────────────────────────────────
+
 
   targaValida(targa: string): boolean {
     return /^[A-Z]{2}\d{3}[A-Z]{2}$/.test(targa.toUpperCase().trim());
   }
+
 
   soloNumeri(event: KeyboardEvent): void {
     if (!/[0-9+\s]/.test(event.key)) event.preventDefault();

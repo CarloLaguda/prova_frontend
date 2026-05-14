@@ -102,33 +102,6 @@
       <div *ngIf="warningMessage" class="text-amber-700 text-xs font-semibold p-2 bg-amber-50 rounded-lg">{{ warningMessage }}</div>
       <div *ngIf="successMessage" class="text-green-600 text-xs font-semibold p-2 bg-green-50 rounded-lg">{{ successMessage }}</div>
 
-      <!-- ── Sezione Soccorso ─────────────────────────────────────────────── -->
-      <div class="rounded-xl border border-dashed border-amber-300 bg-amber-50/60 px-4 py-3 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-            </svg>
-          </div>
-          <div>
-            <p class="text-xs font-black text-amber-800 uppercase tracking-widest">Soccorso stradale</p>
-            <p class="text-[11px] text-amber-600 mt-0.5">Hai bisogno di assistenza immediata?</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          (click)="apriSoccorso()"
-          class="flex-shrink-0 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl shadow transition-all flex items-center gap-1.5"
-        >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-              d="M18.364 5.636l-1.414 1.414A7 7 0 1112 5v2a5 5 0 100 10A5 5 0 0018.364 5.636z"/>
-          </svg>
-          Richiedi
-        </button>
-      </div>
-
       <button
         type="submit"
         [disabled]="loading"
@@ -143,10 +116,3 @@
     </form>
   </div>
 </div>
-
-<!-- ── Modale Soccorso (si sovrappone alla modale sinistro) ─────────────────── -->
-<app-richiesta-soccorso
-  *ngIf="showSoccorso"
-  [sinistroId]="sinistroIdCreato"
-  (closed)="chiudiSoccorso()"
-></app-richiesta-soccorso>

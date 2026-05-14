@@ -23,7 +23,7 @@ export interface SoccorsoPayload {
 @Injectable({ providedIn: 'root' })
 export class SoccorsoService {
 
-  private readonly link = 'https://friendly-space-palm-tree-jjjxx4995v55hq9gw-7000.app.github.dev/';
+  private readonly link = 'https://laughing-spoon-wrrww9446pq62954j-7000.app.github.dev/';
 
   private readonly headers = new HttpHeaders({
     'Content-Type': 'application/json',

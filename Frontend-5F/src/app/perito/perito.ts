@@ -1,6 +1,8 @@
 // ── Shared types ──────────────────────────────────────────────────────────────
 
+
 export type VehicleType = 'car' | 'motorcycle' | 'truck' | 'van' | 'suv';
+
 
 export interface Claim {
   id:               string;
@@ -17,9 +19,9 @@ export interface Claim {
   amount?:          number;
   month?:           number;
   year?:            number;
-  /** ID alternativi per il filtro rifiuto/eliminazione (sinistro._id, pratica._id, ecc.) */
   _altIds?:         string[];
 }
+
 
 export interface Relazione {
   id?:              string;
@@ -35,6 +37,7 @@ export interface Relazione {
   status:           'Bozza' | 'Completata' | 'Inviata';
   createdAt?:       string;
 }
+
 
 export interface SinistroDettaglio {
   id:            string;
@@ -58,19 +61,22 @@ export interface SinistroDettaglio {
   };
 }
 
+
 export interface ArchivedEntry {
   claim:     Claim;
   relazione: Relazione;
 }
 
+
 export interface Toast {
   id:      number;
   message: string;
   sub:     string;
-  claim?:  Claim;
 }
 
+
 // ── Component ──────────────────────────────────────────────────────────────────
+
 
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -79,8 +85,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ClaimCardComponent } from '../claim-card/claim-card.component';
 import { Perizie } from '../services/perizie.service';
 import { AuthService } from '../services/auth.service';
+import { EmailService } from '../services/mail.service';
 import { timer, Subscription } from 'rxjs';
 import jsPDF from 'jspdf';
+
 
 @Component({
   selector: 'app-perito',
@@ -91,6 +99,7 @@ import jsPDF from 'jspdf';
 })
 export class Perito implements OnInit, OnDestroy {
 
+
   currentView: 'dashboard' | 'archivio' | 'relazioni' = 'dashboard';
   isClaimDetailOpen   = false;
   isRelazioneOpen     = false;
@@ -98,31 +107,39 @@ export class Perito implements OnInit, OnDestroy {
   isRelazioniLoading  = false;
   relazioneError      = '';
 
+
   selectedClaim:    Claim | null             = null;
   selectedSinistro: SinistroDettaglio | null = null;
   isLoadingSinistro = false;
   lightboxUrl:      string | null            = null;
 
+
   mapCoords: { lat: number; lng: number } | null = null;
   isGeocodingLocation = false;
 
+
   private aiPollInterval: any = null;
+
 
   claims:    Claim[] = [];
   allClaims: Claim[] = [];
 
+
   private rejectedClaimIds = new Set<string>();
   private deletedClaimIds  = new Set<string>();
+
 
   toasts: Toast[]      = [];
   private toastCounter = 0;
   private previousPendingCount = -1;
-  private previousPendingIds   = new Set<string>();
+
 
   dashboardSearch = '';
 
+
   confirmActionClaim: { claim: Claim; action: 'accept' | 'reject' } | null = null;
   isProcessingAction = false;
+
 
   filterSearch   = '';
   filterStatus   = '';
@@ -130,7 +147,9 @@ export class Perito implements OnInit, OnDestroy {
   filterDateFrom = '';
   filterDateTo   = '';
 
+
   user = { full_name: '', id: '', email: '', phone: '', ruolo: '' };
+
 
   relazioni: Relazione[] = [];
   editingRelazione: Partial<Relazione> = { partiDanneggiate: [], status: 'Bozza' };
@@ -138,6 +157,17 @@ export class Perito implements OnInit, OnDestroy {
   customTipoDanno  = '';
   relazioneSinistro: SinistroDettaglio | null = null;
   isLoadingRelazioneSinistro = false;
+
+
+  // ── Dati form assegnazione officina ───────────────────────────────────────
+  // Usati dal template quando il perito sceglie l'officina per l'intervento.
+  // Chiama assegnaOfficina() dal template con questi valori.
+  formIntervento = {
+    idOfficina:       '',
+    dataInizioLavori: '',
+    notePerizia:      '',
+  };
+
 
   tipiDanno = ['Collisione', 'Grandine', 'Furto', 'Incendio', 'Vandalismo', 'Altro'];
   partiDisponibili = [
@@ -162,17 +192,22 @@ export class Perito implements OnInit, OnDestroy {
   ];
   conclusioni = ['Riparabile', 'Danno totale', 'In valutazione', 'Frode sospetta'];
 
+
   confirmDeleteClaim:     Claim | null     = null;
   confirmDeleteRelazione: Relazione | null = null;
 
+
   private refreshSub?: Subscription;
 
+
   constructor(
-    private perizie:   Perizie,
-    private auth:      AuthService,
-    private cdr:       ChangeDetectorRef,
-    private sanitizer: DomSanitizer,
+    private perizie:      Perizie,
+    private auth:         AuthService,
+    private emailService: EmailService,
+    private cdr:          ChangeDetectorRef,
+    private sanitizer:    DomSanitizer,
   ) {}
+
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -182,69 +217,76 @@ export class Perito implements OnInit, OnDestroy {
     this.startAutoRefresh();
   }
 
+
   private startAutoRefresh(): void {
-    this.refreshSub = timer(45000, 45000).subscribe(() => { this.loadClaims(); });
+    this.refreshSub = timer(15000, 15000).subscribe(() => this.loadClaims());
   }
+
 
   ngOnDestroy(): void {
     this.stopAIPoll();
     this.refreshSub?.unsubscribe();
   }
 
-  private showNewClaimToast(claim: Claim): void {
-    const id = ++this.toastCounter;
-    this.toasts = [...this.toasts, {
-      id,
-      message: 'Nuova pratica assegnata!',
-      sub:     `${claim.code} · ${claim.vehicle}`,
-      claim,
-    }];
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+
+
+  private showNewClaimToast(newCount: number): void {
+    const id  = ++this.toastCounter;
+    const msg = newCount === 1 ? '1 nuova pratica assegnata' : `${newCount} nuove pratiche assegnate`;
+    this.toasts = [...this.toasts, { id, message: 'Nuova pratica!', sub: msg }];
     this.cdr.detectChanges();
-    setTimeout(() => this.dismissToast(id), 30000);
+    setTimeout(() => this.dismissToast(id), 5000);
   }
+
 
   dismissToast(id: number): void {
     this.toasts = this.toasts.filter(t => t.id !== id);
     this.cdr.detectChanges();
   }
 
-  openClaimFromToast(toast: Toast): void {
-    this.dismissToast(toast.id);
-    if (toast.claim) {
-      this.setView('dashboard');
-      this.openClaimDetail(toast.claim);
-    }
-  }
+
+  // ── Getter claims ─────────────────────────────────────────────────────────
+
 
   get pendingClaims(): Claim[] {
     return this.allClaims.filter(c => c.status === 'assegnato').filter(c => this.matchesDashboardSearch(c));
   }
 
+
   get activeClaims(): Claim[] {
-    return this.allClaims.filter(c => c.status !== 'assegnato' && c.status !== 'chiuso').filter(c => this.matchesDashboardSearch(c));
+    return this.allClaims
+      .filter(c => c.status !== 'assegnato' && c.status !== 'chiuso')
+      .filter(c => this.matchesDashboardSearch(c));
   }
+
 
   private matchesDashboardSearch(c: Claim): boolean {
     if (!this.dashboardSearch) return true;
     const q = this.dashboardSearch.toLowerCase();
-    return c.code.toLowerCase().includes(q) || c.vehicle.toLowerCase().includes(q) ||
-           c.location.toLowerCase().includes(q) || c.type.toLowerCase().includes(q) ||
+    return c.code.toLowerCase().includes(q)             ||
+           c.vehicle.toLowerCase().includes(q)          ||
+           c.location.toLowerCase().includes(q)         ||
+           c.type.toLowerCase().includes(q)             ||
            c.insuranceCompany.toLowerCase().includes(q);
   }
 
-  get activeClaimsCount(): number {
-    return this.allClaims.filter(c => c.status === 'in_perizia' || c.status === 'in_valutazione' || c.status === 'in_attesa').length;
-  }
 
+  get activeClaimsCount():  number { return this.allClaims.filter(c => c.status === 'in_perizia' || c.status === 'in_valutazione' || c.status === 'in_attesa').length; }
   get pendingClaimsCount(): number { return this.allClaims.filter(c => c.status === 'assegnato').length; }
   get totalArchiveAmount(): number { return this.relazioni.reduce((sum, r) => sum + (r.estimatedDamage ?? 0), 0); }
-  get relazioniCount(): number { return this.relazioni.length; }
+  get relazioniCount():     number { return this.relazioni.length; }
+
+
+  // ── Filtri archivio ───────────────────────────────────────────────────────
+
 
   private applyFilters(list: Claim[]): Claim[] {
     return list.filter(c => {
       const matchSearch = !this.filterSearch ||
-        c.code.toLowerCase().includes(this.filterSearch.toLowerCase()) ||
-        c.vehicle.toLowerCase().includes(this.filterSearch.toLowerCase()) ||
+        c.code.toLowerCase().includes(this.filterSearch.toLowerCase())     ||
+        c.vehicle.toLowerCase().includes(this.filterSearch.toLowerCase())  ||
         c.location.toLowerCase().includes(this.filterSearch.toLowerCase());
       const matchStatus   = !this.filterStatus   || c.status   === this.filterStatus;
       const matchPriority = !this.filterPriority || c.priority === this.filterPriority;
@@ -261,9 +303,9 @@ export class Perito implements OnInit, OnDestroy {
     });
   }
 
-  get filteredClaims(): Claim[] { return this.applyFilters(this.allClaims); }
 
-  get archivedEntries(): ArchivedEntry[] {
+  get filteredClaims():  Claim[]          { return this.applyFilters(this.allClaims); }
+  get archivedEntries(): ArchivedEntry[]  {
     const entries: ArchivedEntry[] = [];
     for (const c of this.applyFilters(this.allClaims)) {
       const rel = this.getRelazioneForClaim(c);
@@ -272,18 +314,25 @@ export class Perito implements OnInit, OnDestroy {
     return entries;
   }
 
+
+  // ── Load dati ─────────────────────────────────────────────────────────────
+
+
   private loadUser(): void {
     const u = this.auth.currentUser as any;
     if (!u) return;
     this.user = {
       full_name: `${u.nome ?? ''} ${u.cognome ?? ''}`.trim(),
-      id: String(u.id ?? ''), email: u.email ?? '',
-      phone: u.telefono ?? u.phone ?? '', ruolo: u.ruolo ?? '',
+      id:        String(u.id ?? ''),
+      email:     u.email ?? '',
+      phone:     u.telefono ?? u.phone ?? '',
+      ruolo:     u.ruolo ?? '',
     };
   }
 
+
   private loadClaims(): void {
-    const u = this.auth.currentUser as any;
+    const u        = this.auth.currentUser as any;
     const peritoId = String(u?.id ?? 'demo');
     this.perizie.getPratichePerito(peritoId).subscribe({
       next: (data) => { this.applyClaimsData(data.map(p => this.perizie.mapPraticaToClaimCard(p))); },
@@ -299,52 +348,45 @@ export class Perito implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * FIX: controlla sia id che _altIds per entrambi i set di esclusione.
-   * Questo risolve il problema della pratica rifiutata che ricompare al refresh
-   * perché il backend risponde con struttura diversa (sinistro non embedded).
-   */
+
   private isExcluded(c: Claim, excludeSet: Set<string>): boolean {
     if (excludeSet.has(c.id)) return true;
-    if (c._altIds) {
-      for (const alt of c._altIds) { if (excludeSet.has(alt)) return true; }
-    }
+    if (c._altIds) { for (const alt of c._altIds) { if (excludeSet.has(alt)) return true; } }
     return false;
   }
+
 
   private applyClaimsData(raw: Claim[]): void {
     const filtered = raw.filter(c =>
       !this.isExcluded(c, this.rejectedClaimIds) && !this.isExcluded(c, this.deletedClaimIds)
     );
-    const pendingNow = filtered.filter(c => c.status === 'assegnato');
-
-    if (this.previousPendingCount >= 0) {
-      const newlyClaimed = pendingNow.filter(c => !this.previousPendingIds.has(c.id));
-      newlyClaimed.forEach(c => this.showNewClaimToast(c));
+    const newPendingCount = filtered.filter(c => c.status === 'assegnato').length;
+    if (this.previousPendingCount >= 0 && newPendingCount > this.previousPendingCount) {
+      this.showNewClaimToast(newPendingCount - this.previousPendingCount);
     }
-
-    this.previousPendingIds   = new Set(pendingNow.map(c => c.id));
-    this.previousPendingCount = pendingNow.length;
+    this.previousPendingCount = newPendingCount;
     this.claims    = filtered;
     this.allClaims = [...filtered];
     this.isLoading = false;
     this.cdr.detectChanges();
   }
 
+
   private loadRelazioni(): void {
-    const u = this.auth.currentUser as any;
+    const u        = this.auth.currentUser as any;
     const peritoId = String(u?.id ?? '');
     if (!peritoId) { this.isRelazioniLoading = false; return; }
     this.isRelazioniLoading = true;
     this.perizie.getRelazioniPerito(peritoId).subscribe({
       next: (data: any[]) => {
-        this.relazioni = data.map(d => this.mapBackendToRelazione(d));
+        this.relazioni          = data.map(d => this.mapBackendToRelazione(d));
         this.isRelazioniLoading = false;
         this.cdr.detectChanges();
       },
       error: () => { this.relazioni = []; this.isRelazioniLoading = false; this.cdr.detectChanges(); }
     });
   }
+
 
   private mapBackendToRelazione(d: any): Relazione {
     return {
@@ -365,25 +407,35 @@ export class Perito implements OnInit, OnDestroy {
     };
   }
 
+
+  // ── Navigazione ───────────────────────────────────────────────────────────
+
+
   setView(v: 'dashboard' | 'archivio' | 'relazioni'): void {
     this.currentView = v;
     if (v === 'relazioni' || v === 'archivio') this.loadRelazioni();
   }
 
+
+  // ── Accept / Reject ───────────────────────────────────────────────────────
+
+
   openAcceptReject(claim: Claim, action: 'accept' | 'reject'): void {
     this.confirmActionClaim = { claim, action };
   }
+
 
   cancelAcceptReject(): void {
     if (this.isProcessingAction) return;
     this.confirmActionClaim = null;
   }
 
+
   doAcceptReject(): void {
     if (!this.confirmActionClaim || this.isProcessingAction) return;
     const { claim, action } = this.confirmActionClaim;
+    const idPerChiamata     = claim.praticaId ?? claim.id;
 
-    const idPerChiamata = claim.praticaId ?? claim.id;
 
     if (!idPerChiamata) {
       this.confirmActionClaim = null;
@@ -392,9 +444,11 @@ export class Perito implements OnInit, OnDestroy {
       return;
     }
 
+
     this.isProcessingAction = true;
-    const u = this.auth.currentUser as any;
+    const u        = this.auth.currentUser as any;
     const peritoId = String(u?.id ?? '');
+
 
     const applyLocally = (fn: () => void) => {
       fn();
@@ -402,6 +456,7 @@ export class Perito implements OnInit, OnDestroy {
       this.isProcessingAction = false;
       this.cdr.detectChanges();
     };
+
 
     if (action === 'accept') {
       this.perizie.accettaPratica(idPerChiamata, peritoId).subscribe({
@@ -411,7 +466,8 @@ export class Perito implements OnInit, OnDestroy {
     } else {
       this.rejectedClaimIds.add(claim.id);
       if (claim.praticaId) this.rejectedClaimIds.add(claim.praticaId);
-      if (claim._altIds) { claim._altIds.forEach(alt => this.rejectedClaimIds.add(alt)); }
+      if (claim._altIds)   claim._altIds.forEach(alt => this.rejectedClaimIds.add(alt));
+
 
       this.perizie.rifiutaPratica(idPerChiamata, peritoId).subscribe({
         next:  () => applyLocally(() => this.removeClaimById(claim.id)),
@@ -420,12 +476,14 @@ export class Perito implements OnInit, OnDestroy {
     }
   }
 
+
   private updateClaimStatus(id: string, status: Claim['status']): void {
-    const update = (list: Claim[]) => list.map(c => c.id === id ? { ...c, status } : c);
+    const update  = (list: Claim[]) => list.map(c => c.id === id ? { ...c, status } : c);
     this.allClaims = update(this.allClaims);
     this.claims    = update(this.claims);
     if (this.selectedClaim?.id === id) this.selectedClaim = { ...this.selectedClaim, status };
   }
+
 
   private removeClaimById(id: string): void {
     this.allClaims = this.allClaims.filter(c => c.id !== id);
@@ -433,15 +491,17 @@ export class Perito implements OnInit, OnDestroy {
     if (this.selectedClaim?.id === id) this.closeClaimDetail();
   }
 
-  hasRelazione(claim: Claim): boolean {
-    return this.relazioni.some(r => r.sinistroId === claim.id || r.claimCode === claim.code);
-  }
 
-  getRelazioneForClaim(claim: Claim): Relazione | undefined {
-    return this.relazioni.find(r => r.sinistroId === claim.id || r.claimCode === claim.code);
-  }
+  // ── Relazioni ─────────────────────────────────────────────────────────────
 
-  openArchivedEntry(entry: ArchivedEntry): void { this.openRelazioneDetail(entry.relazione); }
+
+  hasRelazione(claim: Claim):         boolean              { return this.relazioni.some(r => r.sinistroId === claim.id || r.claimCode === claim.code); }
+  getRelazioneForClaim(claim: Claim): Relazione | undefined { return this.relazioni.find(r => r.sinistroId === claim.id || r.claimCode === claim.code); }
+  openArchivedEntry(entry: ArchivedEntry): void            { this.openRelazioneDetail(entry.relazione); }
+
+
+  // ── Dettaglio sinistro ────────────────────────────────────────────────────
+
 
   openClaimDetail(c: Claim): void {
     this.selectedClaim     = c;
@@ -452,6 +512,7 @@ export class Perito implements OnInit, OnDestroy {
     this.loadSinistroDetail(c.id);
   }
 
+
   closeClaimDetail(): void {
     this.isClaimDetailOpen   = false;
     this.selectedClaim       = null;
@@ -460,6 +521,7 @@ export class Perito implements OnInit, OnDestroy {
     this.isGeocodingLocation = false;
     this.stopAIPoll();
   }
+
 
   private loadSinistroDetail(sinistroId: string): void {
     this.isLoadingSinistro = true;
@@ -492,11 +554,12 @@ export class Perito implements OnInit, OnDestroy {
     });
   }
 
+
   private async geocodeLocation(address: string): Promise<void> {
     this.mapCoords = null; this.isGeocodingLocation = true; this.cdr.detectChanges();
     try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&addressdetails=0`;
-      const res = await fetch(url, { headers: { 'Accept-Language': 'it,en' } });
+      const url  = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&addressdetails=0`;
+      const res  = await fetch(url, { headers: { 'Accept-Language': 'it,en' } });
       if (res.ok) {
         const data: any[] = await res.json();
         if (data?.length > 0) this.mapCoords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
@@ -505,17 +568,20 @@ export class Perito implements OnInit, OnDestroy {
     this.isGeocodingLocation = false; this.cdr.detectChanges();
   }
 
+
   getMapUrl(coords: { lat: number; lng: number }): SafeResourceUrl {
     const delta = 0.004;
-    const bbox = `${coords.lng - delta},${coords.lat - delta},${coords.lng + delta},${coords.lat + delta}`;
+    const bbox  = `${coords.lng - delta},${coords.lat - delta},${coords.lng + delta},${coords.lat + delta}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(
       `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${coords.lat},${coords.lng}`
     );
   }
 
+
   getOsmLink(coords: { lat: number; lng: number }): string {
     return `https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=17/${coords.lat}/${coords.lng}`;
   }
+
 
   private startAIPoll(sinistroId: string): void {
     let attempts = 0;
@@ -536,31 +602,83 @@ export class Perito implements OnInit, OnDestroy {
     }, 5000);
   }
 
+
   private stopAIPoll(): void {
     if (this.aiPollInterval) { clearInterval(this.aiPollInterval); this.aiPollInterval = null; }
   }
 
+
   openImage(url: string): void { this.lightboxUrl = url; }
   closeLightbox(): void        { this.lightboxUrl = null; }
 
+
+  // ── Assegnazione officina (con email) ─────────────────────────────────────
+
+
+  /**
+   * Chiama il service per assegnare l'officina e invia la notifica email.
+   * Usa this.formIntervento per i dati. Chiamato dal template.
+   *
+   * Esempio nel template:
+   *   <button (click)="assegnaOfficina(claim, periziaid)">Assegna officina</button>
+   */
+  assegnaOfficina(claim: Claim, periziaid: string): void {
+    const u        = this.auth.currentUser as any;
+    const peritoId = String(u?.id ?? '');
+
+
+    this.perizie.askIntervento(claim.id, peritoId, periziaid, {
+      id_officina:       this.formIntervento.idOfficina,
+      data_inizio_lavori: this.formIntervento.dataInizioLavori,
+    }).subscribe({
+      next: () => {
+        // ── Notifica email all'officina ─────────────────────────────────
+        this.emailService.notificaAssegnazioneOfficina({
+          sinistroId:       claim.id,
+          targa:            claim.vehicle,
+          dataInizioLavori: this.formIntervento.dataInizioLavori,
+          notePerizia:      this.formIntervento.notePerizia,
+        });
+        // ────────────────────────────────────────────────────────────────
+
+
+        this.formIntervento = { idOfficina: '', dataInizioLavori: '', notePerizia: '' };
+        this.updateClaimStatus(claim.id, 'in_attesa');
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Errore assegnazione officina:', err)
+    });
+  }
+
+
+  // ── Delete claim ──────────────────────────────────────────────────────────
+
+
   askDeleteClaim(c: Claim, event?: Event): void { event?.stopPropagation(); this.confirmDeleteClaim = c; }
+
 
   confirmDelete(): void {
     if (!this.confirmDeleteClaim) return;
     const claim = this.confirmDeleteClaim;
     this.deletedClaimIds.add(claim.id);
-    if (claim._altIds) { claim._altIds.forEach(alt => this.deletedClaimIds.add(alt)); }
+    if (claim._altIds) claim._altIds.forEach(alt => this.deletedClaimIds.add(alt));
     this.removeClaimById(claim.id);
     this.confirmDeleteClaim = null;
     if (this.selectedClaim?.id === claim.id) this.closeClaimDetail();
-    const u = this.auth.currentUser as any;
+    const u        = this.auth.currentUser as any;
     const peritoId = String(u?.id ?? '');
     this.perizie.eliminaPratica(claim.id, peritoId).subscribe({ next: () => {}, error: () => {} });
   }
 
+
   cancelDelete(): void { this.confirmDeleteClaim = null; }
 
+
+  // ── Delete relazione ──────────────────────────────────────────────────────
+
+
   askDeleteRelazione(rel: Relazione, event?: Event): void { event?.stopPropagation(); this.confirmDeleteRelazione = rel; }
+
 
   confirmDeleteRel(): void {
     if (!this.confirmDeleteRelazione) return;
@@ -576,13 +694,19 @@ export class Perito implements OnInit, OnDestroy {
     }
   }
 
+
   cancelDeleteRel(): void { this.confirmDeleteRelazione = null; }
+
+
+  // ── CRUD relazioni ────────────────────────────────────────────────────────
+
 
   openNewRelazione(): void {
     this.editingRelazione = { partiDanneggiate: [], status: 'Bozza' };
     this.customParte = ''; this.customTipoDanno = ''; this.relazioneSinistro = null;
     this.relazioneError = ''; this.isRelazioneOpen = true;
   }
+
 
   openRelazioneFromClaim(c: Claim): void {
     this.editingRelazione = { claimCode: c.code, sinistroId: c.id, vehicle: c.vehicle, partiDanneggiate: [], status: 'Bozza' };
@@ -591,6 +715,7 @@ export class Perito implements OnInit, OnDestroy {
     else { this.loadSinistroForRelazione(c.id); }
     this.isClaimDetailOpen = false; this.isRelazioneOpen = true;
   }
+
 
   openRelazioneDetail(rel: Relazione): void {
     this.editingRelazione = { ...rel, partiDanneggiate: [...(rel.partiDanneggiate ?? [])] };
@@ -603,10 +728,12 @@ export class Perito implements OnInit, OnDestroy {
     this.isRelazioneOpen = true;
   }
 
+
   closeRelazione(): void {
     this.isRelazioneOpen = false; this.relazioneError = '';
     this.customParte = ''; this.customTipoDanno = ''; this.relazioneSinistro = null;
   }
+
 
   private loadSinistroForRelazione(sinistroId: string): void {
     this.relazioneSinistro = null; this.isLoadingRelazioneSinistro = true; this.cdr.detectChanges();
@@ -630,10 +757,12 @@ export class Perito implements OnInit, OnDestroy {
     });
   }
 
+
   get editingLinkedClaim(): Claim | null {
     if (!this.editingRelazione.claimCode) return null;
     return this.allClaims.find(c => c.code === this.editingRelazione.claimCode) ?? null;
   }
+
 
   saveRelazione(): void {
     this.relazioneError = '';
@@ -644,42 +773,97 @@ export class Perito implements OnInit, OnDestroy {
     }
     this.editingRelazione.sinistroId = claim.id;
     this.editingRelazione.vehicle    = claim.vehicle;
-    const u = this.auth.currentUser as any;
+    const u        = this.auth.currentUser as any;
     const peritoId = String(u?.id ?? '');
     if (!peritoId) { this.relazioneError = 'Sessione scaduta. Rieffettua il login.'; return; }
     const sinistroId = this.editingRelazione.sinistroId!;
-    const now = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+    const now        = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+
+
+    // Snapshot per la email (servono fuori dalla callback)
+    const stimaDanno  = this.editingRelazione.estimatedDamage ?? 0;
+    const esito       = this.editingRelazione.conclusione ?? '';
+    const targa       = claim.vehicle;
+
 
     if (this.editingRelazione.id) {
+      // ── Aggiornamento relazione esistente ──────────────────────────────
       this.perizie.aggiornaRelazione(sinistroId, peritoId, this.editingRelazione).subscribe({
         next: () => {
           const idx = this.relazioni.findIndex(r => r.id === this.editingRelazione.id);
           if (idx !== -1) {
-            this.relazioni = [...this.relazioni.slice(0, idx), { ...(this.editingRelazione as Relazione) }, ...this.relazioni.slice(idx + 1)];
+            this.relazioni = [
+              ...this.relazioni.slice(0, idx),
+              { ...(this.editingRelazione as Relazione) },
+              ...this.relazioni.slice(idx + 1)
+            ];
           }
+
+
+          // ── Notifica chiusura pratica all'assicuratore ────────────────
+          // Inviata solo se la relazione è Completata o Inviata (non Bozza)
+          if (this.editingRelazione.status !== 'Bozza') {
+            this.emailService.notificaChiusuraPratica({
+              sinistroId,
+              targa,
+              stimaDanno,
+              esito,
+            });
+          }
+          // ────────────────────────────────────────────────────────────────
+
+
           this.isRelazioneOpen = false; this.cdr.detectChanges();
         },
         error: (err) => { this.relazioneError = 'Errore durante il salvataggio. Riprova.'; console.error(err); }
       });
     } else {
+      // ── Nuova relazione ───────────────────────────────────────────────
       this.perizie.creaRelazione(sinistroId, peritoId, this.editingRelazione).subscribe({
         next: (res: any) => {
-          const nuova: Relazione = { ...(this.editingRelazione as Relazione), id: res.id_perizia ?? String(Date.now()), status: 'Bozza', createdAt: now };
-          this.relazioni = [...this.relazioni, nuova]; this.isRelazioneOpen = false; this.cdr.detectChanges();
+          const nuova: Relazione = {
+            ...(this.editingRelazione as Relazione),
+            id:        res.id_perizia ?? String(Date.now()),
+            status:    'Bozza',
+            createdAt: now,
+          };
+          this.relazioni = [...this.relazioni, nuova];
+
+
+          // ── Notifica chiusura pratica all'assicuratore ────────────────
+          // Solo se già Completata al momento della creazione (raro ma possibile)
+          if (nuova.status !== 'Bozza') {
+            this.emailService.notificaChiusuraPratica({
+              sinistroId,
+              targa,
+              stimaDanno,
+              esito,
+            });
+          }
+          // ────────────────────────────────────────────────────────────────
+
+
+          this.isRelazioneOpen = false; this.cdr.detectChanges();
         },
         error: (err) => { this.relazioneError = 'Errore durante il salvataggio. Riprova.'; console.error(err); }
       });
     }
   }
 
+
+  // ── Parti danneggiate ─────────────────────────────────────────────────────
+
+
   addParte(p: string): void {
     if (!this.editingRelazione.partiDanneggiate) this.editingRelazione.partiDanneggiate = [];
     this.editingRelazione.partiDanneggiate = [...this.editingRelazione.partiDanneggiate, p];
   }
 
+
   removeParte(i: number): void {
     this.editingRelazione.partiDanneggiate = this.editingRelazione.partiDanneggiate?.filter((_, idx) => idx !== i);
   }
+
 
   addCustomParte(): void {
     const value = this.customParte?.trim();
@@ -690,16 +874,23 @@ export class Perito implements OnInit, OnDestroy {
     this.customParte = '';
   }
 
+
   get isTipoDannoCustom(): boolean { return this.editingRelazione.tipoDanno === 'Altro'; }
+
 
   updateClaimPriority(claim: Claim, priority: 'alta' | 'media' | 'bassa'): void {
     if (!claim || claim.priority === priority) return;
     claim.priority = priority;
-    const update = (list: Claim[]) => list.map(c => c.id === claim.id ? { ...c, priority } : c);
-    this.claims = update(this.claims); this.allClaims = update(this.allClaims);
+    const update   = (list: Claim[]) => list.map(c => c.id === claim.id ? { ...c, priority } : c);
+    this.claims    = update(this.claims);
+    this.allClaims = update(this.allClaims);
     if (this.selectedClaim?.id === claim.id) this.selectedClaim = { ...this.selectedClaim, priority };
     this.cdr.detectChanges();
   }
+
+
+  // ── Export PDF ────────────────────────────────────────────────────────────
+
 
   exportRelazione(rel: Relazione, event?: Event): void {
     event?.stopPropagation();
@@ -736,10 +927,10 @@ export class Perito implements OnInit, OnDestroy {
     }
     if (rel.conclusione) {
       section('Conclusione Peritale'); doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-      if (rel.conclusione === 'Danno totale') doc.setTextColor(220, 38, 38);
-      else if (rel.conclusione === 'Riparabile') doc.setTextColor(5, 150, 105);
+      if (rel.conclusione === 'Danno totale')        doc.setTextColor(220, 38, 38);
+      else if (rel.conclusione === 'Riparabile')     doc.setTextColor(5, 150, 105);
       else if (rel.conclusione === 'Frode sospetta') doc.setTextColor(217, 119, 6);
-      else doc.setTextColor(9, 99, 126);
+      else                                           doc.setTextColor(9, 99, 126);
       doc.text(rel.conclusione, margin, y);
     }
     const pageH = 297;
@@ -750,10 +941,15 @@ export class Perito implements OnInit, OnDestroy {
     doc.save(`Relazione_${rel.claimCode ?? 'perizia'}_${Date.now()}.pdf`);
   }
 
+
+  // ── Utility ───────────────────────────────────────────────────────────────
+
+
   resetFilters(): void {
     this.filterSearch = ''; this.filterStatus = ''; this.filterPriority = '';
     this.filterDateFrom = ''; this.filterDateTo = '';
   }
+
 
   getVehicleType(vehicle: string): VehicleType {
     const v = vehicle.toLowerCase();
@@ -764,6 +960,7 @@ export class Perito implements OnInit, OnDestroy {
     return 'car';
   }
 
+
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
       in_valutazione: 'In Valutazione', assegnato: 'Da Accettare',
@@ -771,6 +968,7 @@ export class Perito implements OnInit, OnDestroy {
     };
     return map[status] ?? status;
   }
+
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
@@ -784,6 +982,7 @@ export class Perito implements OnInit, OnDestroy {
     return map[status] ?? 'bg-slate-100 text-slate-600 border-slate-300';
   }
 
+
   getPriorityClass(priority: string): string {
     const map: Record<string, string> = {
       alta: 'bg-red-100 text-red-700', media: 'bg-orange-100 text-orange-700', bassa: 'bg-green-100 text-green-700',
@@ -791,12 +990,14 @@ export class Perito implements OnInit, OnDestroy {
     return map[priority] ?? '';
   }
 
+
   getRelazioneStatusClass(status: string): string {
     const map: Record<string, string> = {
       Bozza: 'bg-slate-200 text-slate-700', Completata: 'bg-green-100 text-green-800', Inviata: 'bg-teal-100 text-teal-800',
     };
     return map[status] ?? 'bg-slate-200 text-slate-700';
   }
+
 
   getConclusioneClass(c: string | undefined): string {
     switch (c) {
@@ -808,10 +1009,13 @@ export class Perito implements OnInit, OnDestroy {
     }
   }
 
+
   formatDate(isoStr?: string): string {
     if (!isoStr) return '';
     try {
-      return new Date(isoStr).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return new Date(isoStr).toLocaleDateString('it-IT', {
+        day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
     } catch { return isoStr; }
   }
 }

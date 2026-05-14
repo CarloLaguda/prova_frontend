@@ -31,15 +31,6 @@ export class Base implements OnInit {
   saveMessage = '';
   saveError = '';
 
-  // --- Cambia password ---
-  passwordAttuale  = '';
-  nuovaPassword    = '';
-  confermaPassword = '';
-  showPasswordSection   = false;
-  showPasswordAttuale   = false;
-  showNuovaPassword     = false;
-  showConfermaPassword  = false;
-
   // --- Polizze nella sidebar (solo automobilista) ---
   polizze: Polizza[] = [];
   veicoli: Veicolo[] = [];
@@ -158,15 +149,10 @@ export class Base implements OnInit {
 
   enterEditMode(): void {
     if (!this.user) return;
-    // Solo email è modificabile; nome/cognome sono read-only
-    this.editForm = { email: this.user.email };
+    this.editForm = { nome: this.user.nome, cognome: this.user.cognome, email: this.user.email };
     this.editMode = true;
-    this.saveMessage     = '';
-    this.saveError       = '';
-    this.passwordAttuale  = '';
-    this.nuovaPassword    = '';
-    this.confermaPassword = '';
-    this.showPasswordSection = false;
+    this.saveMessage = '';
+    this.saveError = '';
   }
 
   cancelEdit(): void { this.resetEdit(); }
@@ -175,76 +161,28 @@ export class Base implements OnInit {
     this.editMode = false;
     this.editForm = {};
     this.saveError = '';
-    this.passwordAttuale      = '';
-    this.nuovaPassword        = '';
-    this.confermaPassword     = '';
-    this.showPasswordSection  = false;
-    this.showPasswordAttuale  = false;
-    this.showNuovaPassword    = false;
-    this.showConfermaPassword = false;
   }
 
   saveProfile(): void {
     if (!this.user?.id) return;
-
-    // Validazione password se la sezione è aperta
-    if (this.showPasswordSection) {
-      if (!this.passwordAttuale) {
-        this.saveError = 'Inserisci la password attuale per cambiarla.';
-        return;
-      }
-      if (!this.nuovaPassword) {
-        this.saveError = 'Inserisci la nuova password.';
-        return;
-      }
-      if (this.nuovaPassword !== this.confermaPassword) {
-        this.saveError = 'Le nuove password non coincidono.';
-        return;
-      }
-    }
-
     this.savingProfile = true;
-    this.saveMessage   = '';
-    this.saveError     = '';
+    this.saveMessage = '';
+    this.saveError = '';
 
     this.auth.updateUser(this.user.id, this.editForm).subscribe({
       next: (res: any) => {
-        if (res?.status !== 'success') {
-          this.savingProfile = false;
-          this.saveError = res?.error || res?.message || 'Impossibile aggiornare il profilo';
-          this.cdr.detectChanges();
-          return;
-        }
-
-        // Se la sezione password è aperta, cambia anche la password
-        if (this.showPasswordSection && this.nuovaPassword) {
-          this.auth.cambiaPassword(this.user!.id!, this.passwordAttuale, this.nuovaPassword).subscribe({
-            next: () => {
-              this.savingProfile = false;
-              this.saveMessage   = 'Profilo e password aggiornati con successo!';
-              this.editMode      = false;
-              this.resetEdit();
-              this.cdr.detectChanges();
-              setTimeout(() => { this.saveMessage = ''; this.cdr.detectChanges(); }, 3500);
-            },
-            error: (err) => {
-              this.savingProfile = false;
-              this.saveError = err?.error?.error || err?.error?.message || 'Errore durante il cambio password';
-              this.cdr.detectChanges();
-            },
-          });
+        this.savingProfile = false;
+        if (res?.status === 'success') {
+          this.saveMessage = 'Profilo aggiornato con successo';
+          this.editMode = false;
+          setTimeout(() => (this.saveMessage = ''), 3000);
         } else {
-          this.savingProfile = false;
-          this.saveMessage   = 'Profilo aggiornato con successo!';
-          this.editMode      = false;
-          this.cdr.detectChanges();
-          setTimeout(() => { this.saveMessage = ''; this.cdr.detectChanges(); }, 3000);
+          this.saveError = res?.error || res?.message || 'Impossibile aggiornare il profilo';
         }
       },
       error: (err) => {
         this.savingProfile = false;
         this.saveError = err?.error?.error || err?.error?.message || 'Errore di connessione al server';
-        this.cdr.detectChanges();
       },
     });
   }

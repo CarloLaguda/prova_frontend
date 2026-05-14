@@ -13,7 +13,7 @@ export interface AssistenteChatResponse {
   providedIn: 'root',
 })
 export class AssistenteService {
-  private readonly baseUrl = 'https://friendly-space-palm-tree-jjjxx4995v55hq9gw-12000.app.github.dev/assistente/';
+  private readonly baseUrl = 'https://laughing-spoon-wrrww9446pq62954j-12000.app.github.dev/assistente/';
 
   private readonly headers = new HttpHeaders({
     'Content-Type': 'application/json',

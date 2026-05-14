@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { User } from '../models/user.model';
 
@@ -7,8 +7,8 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
-  link = "https://friendly-space-palm-tree-jjjxx4995v55hq9gw-6000.app.github.dev/";
-  linkAssicurazione = "https://friendly-space-palm-tree-jjjxx4995v55hq9gw-5000.app.github.dev/";
+  link = "https://laughing-spoon-wrrww9446pq62954j-6000.app.github.dev/";
+  linkAssicurazione = "https://laughing-spoon-wrrww9446pq62954j-5000.app.github.dev/";
 
   private _currentUser?: User;
 
@@ -25,23 +25,21 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(email_in: string, psw_in: string): Observable<any> {
-  return this.http.post<any>(`${this.link}login`, {
-    email: email_in,
-    password: psw_in
-  }).pipe(
-    tap(res => {
-      console.log("Risposta API Login:", res);
-      if (res.status === "success") {
-        this._currentUser = res.user;
-        localStorage.setItem('currentUser', JSON.stringify(res.user));
-        localStorage.setItem('userRole', res.user.ruolo);
-        localStorage.setItem('access_token', res.access_token);
-        localStorage.setItem('refresh_token', res.refresh_token);
-        console.log("Utente loggato:", this._currentUser);
-      }
-    })
-  );
-}
+    return this.http.post<any>(`${this.link}login`, {
+      email: email_in,
+      password: psw_in
+    }).pipe(
+      tap(res => {
+        console.log("Risposta API Login:", res);
+        if (res.status === "success") {
+          this._currentUser = res.user;
+          localStorage.setItem('currentUser', JSON.stringify(res.user));
+          localStorage.setItem('userRole', res.user.ruolo);
+          console.log("Utente loggato:", this._currentUser);
+        }
+      })
+    );
+  }
 
   signup(nuovoUtente: User): Observable<any> {
     const payload = {
@@ -64,21 +62,9 @@ export class AuthService {
     return this.http.post<any>(`${this.linkAssicurazione}registrazione-completa`, payload);
   }
 
-  cambiaPassword(userId: number, passwordAttuale: string, nuovaPassword: string): Observable<any> {
-    const token   = localStorage.getItem('access_token') ?? '';
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    return this.http.put<any>(
-      `${this.link}utente/${userId}/password`,
-      { password_attuale: passwordAttuale, nuova_password: nuovaPassword },
-      { headers }
-    );
-  }
-
   updateUser(id: number, data: Partial<User>): Observable<any> {
     const ruolo = localStorage.getItem('userRole') ?? '';
-    const token = localStorage.getItem('access_token') ?? '';
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    return this.http.put<any>(`${this.link}utente/${id}`, { ...data, ruolo }, { headers }).pipe(
+    return this.http.put<any>(`${this.link}utente/${id}`, { ...data, ruolo }).pipe(
       tap(res => {
         if (res?.status === 'success') {
           const updated = res.user
@@ -95,7 +81,5 @@ export class AuthService {
     this._currentUser = undefined;
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userRole');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
   }
 }

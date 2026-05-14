@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { VeicoliService } from '../services/veicoli.service';
 import { SoccorsoService, RichiestaSoccorso, SoccorsoPayload } from '../services/soccorso.service';
+import { EmailService } from '../services/mail.service'; // Utilizza il tuo EmailService
 import { Veicolo } from '../models/veicolo.model';
 
 @Component({
@@ -44,6 +45,7 @@ export class RichiestaSoccorsoComponent implements OnInit {
     private soccorsoService: SoccorsoService,
     private auth:            AuthService,
     private veicoliService:  VeicoliService,
+    private emailService:    EmailService, // Iniettato correttamente
     private cdr:             ChangeDetectorRef,
   ) {}
 
@@ -146,6 +148,22 @@ export class RichiestaSoccorsoComponent implements OnInit {
       next: () => {
         this.loading  = false;
         this.successo = 'Richiesta inviata! Il soccorso è in arrivo.';
+
+        // ── NOTIFICA EMAIL (Sistemata col tuo metodo) ──────────────────
+        const posizioneDescrittiva = this.indirizzoRilevato
+          || this.indirizzoManuale
+          || (this.lat !== null && this.lon !== null
+              ? `GPS: ${this.lat.toFixed(5)}, ${this.lon.toFixed(5)}`
+              : 'Posizione non disponibile');
+
+        // Uso il metodo notificaSoccorso definito nel tuo EmailService
+        this.emailService.notificaSoccorso({
+          targa:         this.targaSelezionata,
+          posizione:     posizioneDescrittiva,
+          dataRichiesta: new Date().toLocaleString('it-IT'),
+        });
+        // ────────────────────────────────────────────────────────────────
+
         const userId = this.auth.currentUser?.id;
         if (userId) this.caricaRichieste(userId);
         this.cdr.detectChanges();
@@ -153,12 +171,7 @@ export class RichiestaSoccorsoComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        console.error('[soccorso] Errore invio:', {
-          status:     err.status,
-          statusText: err.statusText,
-          body:       err.error,
-          url:        err.url,
-        });
+        console.error('[soccorso] Errore invio:', err);
         if (err.status === 0) {
           this.errore = 'Impossibile raggiungere il server. Controlla la connessione.';
         } else {
