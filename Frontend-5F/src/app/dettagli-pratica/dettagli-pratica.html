@@ -164,6 +164,77 @@
       </div>
 
       <!-- ══════════════════════════════════════════════ -->
+      <!-- APPROVAZIONE RIMBORSO                         -->
+      <!-- ══════════════════════════════════════════════ -->
+      <div *ngIf="mostraApprovaRimborso || approvaSuccesso || sinistroStato === 'rimborso_approvato'"
+           class="border-t border-slate-100 pt-4">
+
+        <h3 class="text-xs font-black text-[#09637E] uppercase tracking-widest mb-4 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Rimborso
+        </h3>
+
+        <!-- Importo e esito proposto dal perito -->
+        <div *ngIf="perizia?.stima_danno || perizia?.esito" class="grid grid-cols-2 gap-3 mb-4">
+          <div *ngIf="perizia?.stima_danno" class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Importo Proposto</p>
+            <p class="font-black text-blue-700 text-lg">€ {{ perizia.stima_danno | number:'1.2-2' }}</p>
+          </div>
+          <div *ngIf="perizia?.esito" class="bg-[#F4F4F4] rounded-2xl p-4 border border-slate-100">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Esito Perito</p>
+            <p class="font-bold text-[#061E29] text-sm">{{ perizia.esito }}</p>
+          </div>
+        </div>
+
+        <!-- Già approvato -->
+        <div *ngIf="sinistroStato === 'rimborso_approvato' && !approvaSuccesso"
+             class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+          <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm font-black text-green-700">Rimborso già approvato per questo sinistro</p>
+        </div>
+
+        <!-- Feedback successo -->
+        <div *ngIf="approvaSuccesso"
+             class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3 mb-3">
+          <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm font-black text-green-700">{{ approvaSuccesso }}</p>
+        </div>
+
+        <!-- Errore -->
+        <div *ngIf="approvaErrore"
+             class="bg-red-50 border border-red-200 rounded-2xl p-3 mb-3 text-xs font-bold text-red-600">
+          {{ approvaErrore }}
+        </div>
+
+        <!-- Bottone approva -->
+        <button *ngIf="mostraApprovaRimborso"
+                type="button" (click)="approvaRimborso()"
+                [disabled]="loadingApprova"
+                class="w-full flex items-center justify-center gap-2 px-6 py-3 text-xs font-black text-white
+                       bg-[#09637E] rounded-2xl hover:bg-[#088395] transition-all uppercase tracking-widest
+                       shadow-lg shadow-[#09637E]/20 disabled:opacity-60 disabled:cursor-not-allowed">
+          <svg *ngIf="loadingApprova" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          <svg *ngIf="!loadingApprova" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ loadingApprova ? 'Approvazione in corso...' : 'Approva Rimborso' }}
+        </button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════ -->
       <!-- IMMAGINI INCIDENTE                            -->
       <!-- ══════════════════════════════════════════════ -->
       <div class="border-t border-slate-100 pt-4">

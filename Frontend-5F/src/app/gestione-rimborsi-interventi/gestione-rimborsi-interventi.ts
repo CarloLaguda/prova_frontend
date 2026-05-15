@@ -62,7 +62,7 @@ export class GestioneRimborsiInterventi implements OnInit, OnDestroy {
     this.interventoForm.data_inizio_lavori = `${y}-${m}-${d}`;
 
     this.caricaPratiche();
-    this.refreshSub = timer(15000, 15000).subscribe(() => this.caricaPratiche());
+    this.refreshSub = timer(45000, 45000).subscribe(() => this.caricaPratiche());
   }
 
   ngOnDestroy(): void { this.refreshSub?.unsubscribe(); }

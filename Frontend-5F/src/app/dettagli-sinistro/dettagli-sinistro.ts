@@ -5,11 +5,12 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { sinistro } from '../models/sinistro.model';
 import { Sinistri } from '../services/sinistri.service';
 import { CreaPraticaComponent } from '../crea-pratica/crea-pratica';
+import { RichiestaSoccorsoComponent } from '../richiesta-soccorso/richiesta-soccorso';
 
 @Component({
   selector: 'app-dettaglio-sinistro',
   standalone: true,
-  imports: [CommonModule, FormsModule, GoogleMapsModule, CreaPraticaComponent],
+  imports: [CommonModule, FormsModule, GoogleMapsModule, CreaPraticaComponent, RichiestaSoccorsoComponent],
   templateUrl: './dettagli-sinistro.html',
   styleUrls: ['./dettagli-sinistro.css'],
 })
@@ -20,6 +21,7 @@ export class DettaglioSinistroComponent implements OnInit {
 
   stati = ['APERTO', 'IN ANALISI', 'CHIUSO', 'in_perizia', 'in_riparazione', 'rimborso_proposto'];
   mostraCreaPratica = false;
+  showSoccorso      = false;
   descrizioneEditabile = '';
   saving = false;
   saveError = '';

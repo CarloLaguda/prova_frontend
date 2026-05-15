@@ -63,7 +63,7 @@ export class Automobilista implements OnInit, OnDestroy {
   }
 
   startAutoRefresh(): void {
-    this.refreshSub = timer(0, 15000).subscribe(() => this.caricaDati());
+    this.refreshSub = timer(0, 45000).subscribe(() => this.caricaDati());
   }
 
   caricaDati(): void {
@@ -87,6 +87,29 @@ export class Automobilista implements OnInit, OnDestroy {
       (s.descrizione?.toLowerCase().includes(search)) ||
       (s.stato?.toLowerCase().includes(search))
     );
+  }
+
+  /** Sinistri con rimborso in attesa o già approvato */
+  get sinistriConRimborso(): sinistro[] {
+    return this.sinistri.filter(s => {
+      const stato = (s.stato_sinistro ?? s.stato ?? '').toLowerCase();
+      return stato === 'rimborso_proposto' || stato === 'rimborso_approvato';
+    });
+  }
+
+  /** Somma degli importi di rimborso approvati */
+  get totaleRimborsiApprovati(): number {
+    return this.sinistri
+      .filter(s => (s.stato_sinistro ?? s.stato ?? '').toLowerCase() === 'rimborso_approvato')
+      .reduce((sum, s) => {
+        const importo = (s as any).preventivo?.costo_totale ?? (s as any).stima_danno ?? 0;
+        return sum + (Number(importo) || 0);
+      }, 0);
+  }
+
+  /** Importo di rimborso del sinistro (preventivo o stima_danno) */
+  importoRimborso(s: sinistro): number {
+    return (s as any).preventivo?.costo_totale ?? (s as any).stima_danno ?? 0;
   }
 
   openDettaglio(s: sinistro): void    { this.sinistroSelezionato = s; }

@@ -98,6 +98,26 @@
         </div>
       </div>
 
+      <!-- Checkbox soccorso -->
+      <label class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border transition-all select-none"
+             [class.border-red-300]="richiediSoccorso"
+             [class.bg-red-50]="richiediSoccorso"
+             [class.border-slate-200]="!richiediSoccorso"
+             [class.bg-[#F4F4F4]]="!richiediSoccorso">
+        <input type="checkbox" [(ngModel)]="richiediSoccorso" name="richiediSoccorso"
+               class="w-4 h-4 accent-red-500 cursor-pointer" />
+        <div>
+          <p class="text-xs font-black uppercase tracking-widest"
+             [class.text-red-600]="richiediSoccorso"
+             [class.text-slate-500]="!richiediSoccorso">
+            Richiedi soccorso stradale
+          </p>
+          <p class="text-[10px] font-semibold text-slate-400 mt-0.5">
+            Verrà inviata automaticamente una richiesta di soccorso
+          </p>
+        </div>
+      </label>
+
       <div *ngIf="errorMessage" class="text-red-600 text-xs font-semibold p-2 bg-red-50 rounded-lg">{{ errorMessage }}</div>
       <div *ngIf="warningMessage" class="text-amber-700 text-xs font-semibold p-2 bg-amber-50 rounded-lg">{{ warningMessage }}</div>
       <div *ngIf="successMessage" class="text-green-600 text-xs font-semibold p-2 bg-green-50 rounded-lg">{{ successMessage }}</div>

@@ -211,7 +211,7 @@ export class EmailService {
 
 
   // Porta 11000 → endpoint_5F_Mail.py
-  private readonly baseUrl = 'https://laughing-spoon-wrrww9446pq62954j-11000.app.github.dev';
+  private readonly baseUrl = 'https://ubiquitous-happiness-x55jj9xxw7xjf66rx-11000.app.github.dev/';
 
 
   constructor(private http: HttpClient) {}

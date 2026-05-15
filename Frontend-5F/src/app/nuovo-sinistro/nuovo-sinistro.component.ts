@@ -5,9 +5,8 @@ import { Sinistri } from '../services/sinistri.service';
 import { VeicoliService } from '../services/veicoli.service';
 import { AuthService } from '../services/auth.service';
 import { EmailService } from '../services/mail.service';
+import { SoccorsoService } from '../services/soccorso.service';
 import { sinistro } from '../models/sinistro.model';
-
-
 @Component({
   selector: 'app-nuovo-sinistro',
   standalone: true,
@@ -27,11 +26,12 @@ export class NuovoSinistroComponent implements OnInit {
     luogo: '',
     geolocalizzazione: { latitudine: 0, longitudine: 0 }
   };
-  maxDate        = '';
-  loading        = false;
-  errorMessage   = '';
-  warningMessage = '';
-  successMessage = '';
+  maxDate          = '';
+  loading          = false;
+  errorMessage     = '';
+  warningMessage   = '';
+  successMessage   = '';
+  richiediSoccorso = false;
 
 
   constructor(
@@ -39,6 +39,7 @@ export class NuovoSinistroComponent implements OnInit {
     public  veicoliService:  VeicoliService,
     private auth:            AuthService,
     private emailService:    EmailService,
+    private soccorsoService: SoccorsoService,
   ) {}
 
 
@@ -122,10 +123,8 @@ export class NuovoSinistroComponent implements OnInit {
         this.loading        = false;
         this.successMessage = 'Sinistro e pratica creati con successo!';
 
-
         const sinistroId = res?.mongo_id ?? res?.id_mongo ?? '';
         const nome = `${this.auth.currentUser?.nome ?? ''} ${this.auth.currentUser?.cognome ?? ''}`.trim();
-
 
         // ── Notifica automobilista ─────────────────────────────────────
         this.emailService.notificaNuovoSinistro({
@@ -137,6 +136,34 @@ export class NuovoSinistroComponent implements OnInit {
         });
         // ──────────────────────────────────────────────────────────────
 
+        // ── Soccorso automatico se richiesto ──────────────────────────
+        if (this.richiediSoccorso) {
+          const soccorsoPayload: any = {
+            targa:           payload.targa,
+            id_sinistro:     sinistroId || null,
+            orario_arrivo:   null,
+            durata_soccorso: null,
+            note:            '',
+          };
+          if (hasPosition) {
+            soccorsoPayload.lat = this.formData.geolocalizzazione.latitudine;
+            soccorsoPayload.lon = this.formData.geolocalizzazione.longitudine;
+          }
+          if (this.formData.luogo?.trim()) {
+            soccorsoPayload.via = this.formData.luogo.trim();
+          }
+          this.soccorsoService.inviaSoccorso(soccorsoPayload).subscribe({
+            next: () => this.emailService.notificaSoccorso({
+              targa:         payload.targa,
+              posizione:     this.formData.luogo?.trim()
+                             || (hasPosition ? `GPS: ${soccorsoPayload.lat?.toFixed(5)}, ${soccorsoPayload.lon?.toFixed(5)}` : 'Non disponibile'),
+              dataRichiesta: new Date().toLocaleString('it-IT'),
+            }),
+            error: (err) => console.error('[soccorso] Errore invio automatico:', err),
+          });
+          this.successMessage = 'Sinistro creato e soccorso inviato!';
+        }
+        // ──────────────────────────────────────────────────────────────
 
         this.created.emit(res);
         setTimeout(() => this.close(), 1500);

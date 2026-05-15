@@ -9,7 +9,7 @@ import { Polizza } from '../models/polizza.model';
 
 export class PolizzeService {
 
-  private readonly base = 'https://laughing-spoon-wrrww9446pq62954j-9000.app.github.dev/';
+  private readonly base = 'https://ubiquitous-happiness-x55jj9xxw7xjf66rx-9000.app.github.dev/';
 
   constructor(private http: HttpClient) {}
 

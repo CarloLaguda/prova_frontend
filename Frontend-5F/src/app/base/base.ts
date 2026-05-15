@@ -26,10 +26,19 @@ export class Base implements OnInit {
 
   // --- Edit profilo ---
   editMode = false;
-  editForm: Partial<User> = {};
+  editForm: Partial<User> & { telefono?: string } = {};
   savingProfile = false;
   saveMessage = '';
   saveError = '';
+
+  // --- Cambio password ---
+  showPasswordSection = false;
+  passwordForm = { nuova: '', conferma: '' };
+  showNuova    = false;
+  showConferma = false;
+  savingPassword    = false;
+  passwordSuccesso  = '';
+  passwordErrore    = '';
 
   // --- Polizze nella sidebar (solo automobilista) ---
   polizze: Polizza[] = [];
@@ -72,6 +81,7 @@ export class Base implements OnInit {
   }
 
   get user() { return this.auth.currentUser; }
+  get userTelefono(): string { return (this.auth.currentUser as any)?.telefono ?? ''; }
 
   get initials(): string {
     const u = this.user;
@@ -149,7 +159,12 @@ export class Base implements OnInit {
 
   enterEditMode(): void {
     if (!this.user) return;
-    this.editForm = { nome: this.user.nome, cognome: this.user.cognome, email: this.user.email };
+    this.editForm = {
+      nome:     this.user.nome,
+      cognome:  this.user.cognome,
+      email:    this.user.email,
+      telefono: (this.user as any).telefono ?? '',
+    };
     this.editMode = true;
     this.saveMessage = '';
     this.saveError = '';
@@ -161,6 +176,40 @@ export class Base implements OnInit {
     this.editMode = false;
     this.editForm = {};
     this.saveError = '';
+    this.showPasswordSection = false;
+    this.passwordForm = { nuova: '', conferma: '' };
+    this.passwordSuccesso = '';
+    this.passwordErrore = '';
+  }
+
+  cambiaPassword(): void {
+    if (!this.user?.id) return;
+    if (!this.passwordForm.nuova.trim()) {
+      this.passwordErrore = 'Inserisci la nuova password.'; return;
+    }
+    if (this.passwordForm.nuova.length < 6) {
+      this.passwordErrore = 'La password deve contenere almeno 6 caratteri.'; return;
+    }
+    if (this.passwordForm.nuova !== this.passwordForm.conferma) {
+      this.passwordErrore = 'Le password non coincidono.'; return;
+    }
+    this.savingPassword  = true;
+    this.passwordErrore  = '';
+    this.passwordSuccesso = '';
+    this.auth.updateUser(this.user.id, { password_hash: this.passwordForm.nuova }).subscribe({
+      next: () => {
+        this.savingPassword   = false;
+        this.passwordSuccesso = 'Password aggiornata con successo!';
+        this.passwordForm     = { nuova: '', conferma: '' };
+        this.cdr.detectChanges();
+        setTimeout(() => { this.passwordSuccesso = ''; this.showPasswordSection = false; }, 3000);
+      },
+      error: (err: any) => {
+        this.savingPassword = false;
+        this.passwordErrore = err?.error?.error ?? 'Errore durante il cambio password. Riprova.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   saveProfile(): void {
@@ -172,17 +221,22 @@ export class Base implements OnInit {
     this.auth.updateUser(this.user.id, this.editForm).subscribe({
       next: (res: any) => {
         this.savingProfile = false;
-        if (res?.status === 'success') {
+        // Considera successo qualsiasi risposta HTTP 2xx senza campo errore esplicito
+        const isError = res?.status === 'error' || res?.error;
+        if (!isError) {
           this.saveMessage = 'Profilo aggiornato con successo';
-          this.editMode = false;
-          setTimeout(() => (this.saveMessage = ''), 3000);
+          this.editMode    = false;
+          this.cdr.detectChanges();
+          setTimeout(() => { this.saveMessage = ''; this.cdr.detectChanges(); }, 3000);
         } else {
           this.saveError = res?.error || res?.message || 'Impossibile aggiornare il profilo';
+          this.cdr.detectChanges();
         }
       },
       error: (err) => {
         this.savingProfile = false;
         this.saveError = err?.error?.error || err?.error?.message || 'Errore di connessione al server';
+        this.cdr.detectChanges();
       },
     });
   }

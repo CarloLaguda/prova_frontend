@@ -69,8 +69,8 @@
         </button>
       </div>
 
-      <!-- Messaggio successo -->
-      <div *ngIf="saveMessage && !editMode"
+      <!-- Messaggio successo profilo -->
+      <div *ngIf="saveMessage"
         class="mb-3 flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-xl text-xs font-bold text-green-700">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -96,6 +96,10 @@
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Codice Fiscale</p>
           <p class="text-sm font-bold text-slate-900 mt-0.5 font-mono tracking-wide">{{ user?.cf || '—' }}</p>
         </div>
+        <div class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Telefono</p>
+          <p class="text-sm font-bold text-slate-900 mt-0.5">{{ userTelefono || '—' }}</p>
+        </div>
         <div *ngIf="user?.id" class="bg-[#F4F4F4] rounded-xl px-4 py-3 border border-[#7AB2B2]/30">
           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ID Utente</p>
           <p class="text-sm font-bold text-slate-900 mt-0.5 font-mono">#{{ user?.id }}</p>
@@ -120,6 +124,13 @@
           <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email</label>
           <input type="email" name="email" required
             [(ngModel)]="editForm.email"
+            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Telefono</label>
+          <input type="tel" name="telefono"
+            [(ngModel)]="editForm.telefono"
             class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
         </div>
 
@@ -153,6 +164,98 @@
           </button>
         </div>
       </form>
+    </div>
+
+    <!-- ============================================================
+         SEZIONE CAMBIO PASSWORD
+         ============================================================ -->
+    <div *ngIf="editMode" class="px-6 pb-4">
+      <div class="border-t border-slate-100 mb-4"></div>
+
+      <button type="button" (click)="showPasswordSection = !showPasswordSection"
+        class="w-full flex items-center justify-between px-4 py-2.5 bg-[#F4F4F4] hover:bg-[#EBF4F6] rounded-xl text-[11px] font-black text-slate-600 uppercase tracking-widest transition-all border border-[#7AB2B2]/30">
+        <span class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-[#09637E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          Cambia Password
+        </span>
+        <svg class="w-4 h-4 transition-transform" [class.rotate-180]="showPasswordSection"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <div *ngIf="showPasswordSection" class="mt-3 space-y-3">
+
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nuova password</label>
+          <div class="relative">
+            <input [type]="showNuova ? 'text' : 'password'" [(ngModel)]="passwordForm.nuova"
+              placeholder="Minimo 6 caratteri"
+              class="w-full px-4 py-2.5 pr-10 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900
+                     focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+            <button type="button" (click)="showNuova = !showNuova"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path *ngIf="!showNuova" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                <path *ngIf="showNuova" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Conferma password</label>
+          <div class="relative">
+            <input [type]="showConferma ? 'text' : 'password'" [(ngModel)]="passwordForm.conferma"
+              placeholder="Ripeti la nuova password"
+              class="w-full px-4 py-2.5 pr-10 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900
+                     focus:outline-none focus:border-[#09637E] focus:ring-2 focus:ring-[#09637E]/20 transition-all" />
+            <button type="button" (click)="showConferma = !showConferma"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path *ngIf="!showConferma" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                <path *ngIf="showConferma" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="passwordErrore"
+          class="flex items-center gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ passwordErrore }}
+        </div>
+
+        <button type="button" (click)="cambiaPassword()" [disabled]="savingPassword"
+          class="w-full px-4 py-2.5 bg-[#09637E] hover:bg-[#074f65] rounded-xl text-sm font-black text-white
+                 shadow-lg shadow-[#7AB2B2]/40 transition-all disabled:opacity-60 disabled:cursor-not-allowed
+                 flex items-center justify-center gap-2">
+          <svg *ngIf="savingPassword" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          {{ savingPassword ? 'Aggiornamento...' : 'Aggiorna password' }}
+        </button>
+
+      </div>
+
+      <!-- Successo password — fuori dal collassabile per restare visibile dopo la chiusura -->
+      <div *ngIf="passwordSuccesso"
+        class="mt-3 flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-xl text-xs font-bold text-green-700">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+        {{ passwordSuccesso }}
+      </div>
     </div>
 
     <!-- ============================================================

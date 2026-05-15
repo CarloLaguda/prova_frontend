@@ -7,8 +7,8 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
-  link = "https://laughing-spoon-wrrww9446pq62954j-6000.app.github.dev/";
-  linkAssicurazione = "https://laughing-spoon-wrrww9446pq62954j-5000.app.github.dev/";
+  link = "https://ubiquitous-happiness-x55jj9xxw7xjf66rx-6000.app.github.dev/";
+  linkAssicurazione = "https://ubiquitous-happiness-x55jj9xxw7xjf66rx-5000.app.github.dev/";
 
   private _currentUser?: User;
 
@@ -35,6 +35,8 @@ export class AuthService {
           this._currentUser = res.user;
           localStorage.setItem('currentUser', JSON.stringify(res.user));
           localStorage.setItem('userRole', res.user.ruolo);
+          const token = res.access_token ?? res.token ?? null;
+          if (token) localStorage.setItem('access_token', token);
           console.log("Utente loggato:", this._currentUser);
         }
       })
@@ -81,5 +83,6 @@ export class AuthService {
     this._currentUser = undefined;
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('access_token');
   }
 }
