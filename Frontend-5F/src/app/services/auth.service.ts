@@ -7,8 +7,8 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class AuthService {
-  link = "https://ubiquitous-happiness-x55jj9xxw7xjf66rx-6000.app.github.dev/";
-  linkAssicurazione = "https://ubiquitous-happiness-x55jj9xxw7xjf66rx-5000.app.github.dev/";
+  link = "/api/auth/";
+  linkAssicurazione = "/api/assicurazione/";
 
   private _currentUser?: User;
 
