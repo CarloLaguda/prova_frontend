@@ -24,6 +24,10 @@ export class DettaglioPraticaComponent implements OnInit {
   analisiAi: any = null;
   loadingAnalisi = false;
 
+  // ── Dati sinistro ─────────────────────────────────────────────────────────
+  sinistroTarga      = '';
+  sinistroLuogo      = '';
+
   // ── Rimborso ─────────────────────────────────────────────────────────────
   sinistroStato      = '';
   sinistroStimaDanno: number | null = null;
@@ -74,6 +78,8 @@ export class DettaglioPraticaComponent implements OnInit {
         this.analisiAi          = sinistro?.analisi_ai ?? null;
         this.sinistroStato      = (sinistro?.stato_sinistro ?? sinistro?.stato ?? '').toLowerCase();
         this.sinistroStimaDanno = sinistro?.preventivo?.costo_totale ?? sinistro?.stima_danno ?? null;
+        this.sinistroTarga      = sinistro?.targa ?? '';
+        this.sinistroLuogo      = sinistro?.luogo ?? '';
         this.loadingImmagini    = false;
         this.loadingAnalisi     = false;
         this.cdr.detectChanges();
