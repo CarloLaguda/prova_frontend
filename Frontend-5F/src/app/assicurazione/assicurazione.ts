@@ -49,6 +49,13 @@ export class Assicurazione implements OnInit, OnDestroy {
   peritoSelezionatoId = '';
   assegnando          = false;
 
+  // ── Notifiche nuove pratiche ──────────────────────────────────────────────
+  nuovePraticheNotifica: Pratica[] = [];
+  private pratichePrecedentiIds = new Set<string>();
+  private primoCaricamento      = true;
+  private notificaTimer?: ReturnType<typeof setTimeout>;
+  // ──────────────────────────────────────────────────────────────────────────
+
   private refreshSubscription?: Subscription;
 
   constructor(
@@ -147,12 +154,38 @@ export class Assicurazione implements OnInit, OnDestroy {
     this.loadingPratiche = true;
     this.sinistri.getPratiche().subscribe({
       next: (res: any) => {
-        this.pratiche        = res.pratiche || [];
-        this.loadingPratiche = false;
+        const nuove: Pratica[] = res.pratiche || [];
+
+        if (!this.primoCaricamento) {
+          const nuoveTrovate = nuove.filter(
+            p => p._id && !this.pratichePrecedentiIds.has(p._id)
+          );
+          if (nuoveTrovate.length > 0) {
+            this.nuovePraticheNotifica = nuoveTrovate;
+            clearTimeout(this.notificaTimer);
+            this.notificaTimer = setTimeout(() => this.chiudiNotificaPratica(), 12000);
+          }
+        }
+
+        this.pratiche             = nuove;
+        this.pratichePrecedentiIds = new Set(nuove.map(p => p._id!).filter(Boolean));
+        this.primoCaricamento      = false;
+        this.loadingPratiche       = false;
         this.cdr.detectChanges();
       },
-      error: () => this.loadingPratiche = false
+      error: () => { this.loadingPratiche = false; }
     });
+  }
+
+  chiudiNotificaPratica(): void {
+    this.nuovePraticheNotifica = [];
+    clearTimeout(this.notificaTimer);
+    this.cdr.detectChanges();
+  }
+
+  apriDettaglioDaNotifica(p: Pratica): void {
+    this.chiudiNotificaPratica();
+    this.praticaSelezionata = p;
   }
 
   caricaPolizze(): void {
@@ -245,5 +278,8 @@ export class Assicurazione implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void { this.refreshSubscription?.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.refreshSubscription?.unsubscribe();
+    clearTimeout(this.notificaTimer);
+  }
 }
