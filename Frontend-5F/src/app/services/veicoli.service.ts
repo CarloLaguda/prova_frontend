@@ -7,7 +7,7 @@ import { Veicolo } from '../models/veicolo.model';
   providedIn: 'root',
 })
 export class VeicoliService {
-  private link = 'https://ubiquitous-happiness-x55jj9xxw7xjf66rx-5000.app.github.dev/';
+  private link = 'https://potential-pancake-pjjxxg99jr69377g9-10000.app.github.dev/';
 
   // Stato interno dei veicoli (riflette l'ultima operazione di caricamento fatta)
   public veicoli: Veicolo[] = [];

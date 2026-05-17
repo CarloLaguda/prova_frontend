@@ -11,8 +11,8 @@ import { Relazione, Claim } from '../perito/perito';
 })
 export class Perizie {
 
-  private praticheLink = 'https://ubiquitous-happiness-x55jj9xxw7xjf66rx-8000.app.github.dev/';
-  private sinistriLink = 'https://ubiquitous-happiness-x55jj9xxw7xjf66rx-7000.app.github.dev/';
+  private praticheLink = 'https://potential-pancake-pjjxxg99jr69377g9-8000.app.github.dev/';
+  private sinistriLink = 'https://potential-pancake-pjjxxg99jr69377g9-7000.app.github.dev/';
 
   constructor(public http: HttpClient) {}
 
