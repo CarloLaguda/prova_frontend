@@ -25,14 +25,6 @@
           </svg>
           Dashboard
         </button>
-        <button (click)="showNuovoVeicolo = true"
-          class="flex items-center gap-2 px-4 py-2 text-xs font-black text-white bg-[#09637E] rounded-lg
-                 hover:bg-[#088395] transition-all uppercase tracking-widest shadow-lg shadow-[#09637E]/20">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-          </svg>
-          Nuovo Veicolo
-        </button>
       </div>
 
     </div>
@@ -49,7 +41,7 @@
     </div>
 
     <!-- ===== STATS BAR ===== -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 animate-fade-down delay-1">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-down delay-1">
 
       <!-- Totale veicoli -->
       <div class="bg-white p-5 px-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4
@@ -85,21 +77,6 @@
             </span>
           </div>
           <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Polizze Attive</p>
-        </div>
-      </div>
-
-      <!-- Sinistri aperti (placeholder) -->
-      <div class="bg-white p-5 px-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4
-                  border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
-        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-3xl font-black text-slate-900">0</p>
-          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sinistri Aperti</p>
         </div>
       </div>
 
@@ -221,14 +198,6 @@
           </div>
         </div>
 
-        <button (click)="showNuovoVeicolo = true"
-          class="inline-flex items-center gap-2 px-8 py-3 text-xs font-black text-white bg-[#09637E] rounded-xl
-                 hover:bg-[#088395] transition-all uppercase tracking-widest shadow-lg shadow-[#09637E]/25">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-          </svg>
-          Aggiungi il Primo Veicolo
-        </button>
 
       </div>
     </div>
@@ -256,12 +225,6 @@
   </main>
 
   <!-- Modals -->
-  <app-nuovo-veicolo
-    *ngIf="showNuovoVeicolo"
-    (created)="onVeicoloCreato()"
-    (closed)="showNuovoVeicolo = false">
-  </app-nuovo-veicolo>
-
   <app-dettagli-veicolo
     *ngIf="veicoloSelezionato"
     [veicolo]="veicoloSelezionato"
