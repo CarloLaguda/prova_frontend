@@ -4,8 +4,8 @@ COPY package*.json ./
 RUN npm ci
 RUN npm install jspdf
 COPY . .
-RUN sed -i 's/"maximumError": "1mb"/"maximumError": "4mb"/g' angular.json && \
-    sed -i 's/"maximumError": "500kb"/"maximumError": "2mb"/g' angular.json
+RUN sed -i 's/"maximumError": "1MB"/"maximumError": "4MB"/g' angular.json && \
+    sed -i 's/"maximumWarning": "500kB"/"maximumWarning": "2MB"/g' angular.json
 RUN npm run build
 
 FROM nginx:alpine
